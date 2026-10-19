@@ -1,0 +1,6 @@
+# Evita que el vigilante de archivos recorra los módulos de transformers (genera errores de torchvision en el log)
+[server]
+fileWatcherType = "none"
+
+[browser]
+gatherUsageStats = false
