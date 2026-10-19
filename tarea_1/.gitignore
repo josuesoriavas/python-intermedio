@@ -1,0 +1,13 @@
+# Pesos del modelo (pesados, > 100 MB): no se suben a GitHub
+modelo/*.safetensors
+modelo/*.bin
+modelo/*.pt
+modelo/checkpoint-*/
+modelo/runs/
+checkpoints/
+
+# Entorno y credenciales
+.venv/
+.env
+__pycache__/
+.ipynb_checkpoints/
