@@ -1,0 +1,50 @@
+{
+  "fecha": "2026-10-18 20:05",
+  "n_noticias": 400,
+  "n_train": 280,
+  "n_val": 60,
+  "n_test": 60,
+  "f1_macro_test": 0.8654,
+  "accuracy_test": 0.8667,
+  "zero_shot_f1_40": 0.6379,
+  "zero_shot_acc_40": 0.65,
+  "modelo_final": "dccuchile/bert-base-spanish-wwm-cased",
+  "val_f1_candidatos": {
+    "distilbert-base-multilingual-cased": 0.853,
+    "dccuchile/bert-base-spanish-wwm-cased": 0.8683
+  },
+  "llm_modelo": "ollama/qwen2.5:3b",
+  "llm_f1_dataset": 0.8732,
+  "auditoria_acuerdos": 19,
+  "auditoria_total": 20,
+  "auditoria_pct": 0.95,
+  "comparativa": [
+    {
+      "modelo": "Zero-shot NLI (bert-base-spanish-wwm-cased-xnli)",
+      "entrenamiento": "ninguno",
+      "accuracy_test": 0.6667,
+      "f1_macro_test": 0.6483,
+      "ms_por_titular_cpu": 78.4331,
+      "tamaño": "~440 MB",
+      "costo": "gratis, CPU"
+    },
+    {
+      "modelo": "LLM débil (Ollama qwen2.5:3b)",
+      "entrenamiento": "ninguno (zero-shot)",
+      "accuracy_test": 0.8333,
+      "f1_macro_test": 0.827,
+      "ms_por_titular_cpu": 3787.9044,
+      "tamaño": "~1.9 GB",
+      "costo": "gratis local; requiere servidor Ollama"
+    },
+    {
+      "modelo": "Fine-tuned (bert-base-spanish-wwm-cased)",
+      "entrenamiento": "280 titulares, 5 épocas, 2.1 min CPU",
+      "accuracy_test": 0.8667,
+      "f1_macro_test": 0.8654,
+      "ms_por_titular_cpu": 22.3916,
+      "tamaño": "~439 MB",
+      "costo": "gratis, CPU"
+    }
+  ]
+}
