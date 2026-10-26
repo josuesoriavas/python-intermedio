@@ -1,0 +1,35 @@
+# Entorno con el que se ejecutaron 01_extraccion.ipynb y 02_evaluacion.ipynb
+# Python 3.12, Windows 11, solo CPU. Instalar con:
+#   uv venv .venv --python 3.12
+#   uv pip install -r requirements-notebooks.txt --index-strategy unsafe-best-match
+# PaddleX fija opencv-contrib-python==4.10.0.84 y faster-whisper 1.2.1 falla con av>=19 (restricción del curso).
+--extra-index-url https://download.pytorch.org/whl/cpu
+paddlepaddle==3.3.1
+paddleocr==3.7.0
+paddlex==3.7.2
+opencv-contrib-python==4.10.0.84
+easyocr==1.7.2
+faster-whisper==1.2.1
+ctranslate2==4.8.4
+av==18.1.0
+torch==2.14.1+cpu
+torchaudio==2.11.0+cpu
+transformers==5.20.2
+accelerate==1.15.0
+huggingface-hub==2.3.0
+pyannote-audio==4.0.7
+jiwer==4.0.0
+rapidfuzz==3.14.6
+soundfile==0.14.0
+librosa==1.0.0
+scipy==1.18.1
+scikit-learn==1.9.1
+numpy==2.3.5
+pandas==3.1.0
+pillow==13.0.0
+requests==2.34.2
+plotly==7.1.0
+kaleido==1.5.0
+nbformat==5.11.1
+nbconvert==7.17.2
+ipykernel==7.4.0

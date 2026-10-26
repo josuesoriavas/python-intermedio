@@ -110,7 +110,7 @@ def _get(url, rango=None, pausa=1.5):
         except urllib.error.HTTPError as e:
             if e.code != 429 or intento == 4:
                 raise
-            time.sleep(10 * (intento + 1))
+            time.sleep(60 * (intento + 1))
 
 
 def api(host, **p):
@@ -123,6 +123,17 @@ def sha1(ruta: Path) -> str:
 
 
 # ───────────────────────────────────────────────────────── documentos
+def _url_imagen(ii: dict, pagina: int | None) -> str:
+    """Wikimedia pide usar miniaturas de tamaño estándar (https://w.wiki/GHai): 1280 px para páginas
+    de PDF/DjVu y 1920 px para fotos grandes; las imágenes chicas se bajan tal cual."""
+    sin_query = lambda u: u.split("?")[0].replace("thumb.wikimedia.org", "upload.wikimedia.org")
+    if pagina:
+        return re.sub(r"page(\d+)-\d+px-", r"page\1-1280px-", sin_query(ii["thumburl"]))
+    if ii["width"] <= 1920:
+        return sin_query(ii["url"])
+    return re.sub(r"/\d+px-", "/1920px-", sin_query(ii["thumburl"]))
+
+
 def _limpiar_wikitexto(t: str) -> str:
     """Wikitexto de una página de Wikisource -> texto plano tal como aparece en el escaneo."""
     cab = re.search(r"\{\{cp\|([^}]*)\}\}", t)  # cabecera de página: número y título corrido
@@ -144,7 +155,8 @@ def _limpiar_descripcion(t: str) -> str:
     """Descripción de Commons -> solo lo que está escrito en la imagen."""
     t = re.sub(r"^Dibujo \d+\. [^\n]*?(?=\d{3,4} \[)", "", t)   # título editorial de la edición digital
     t = re.sub(r"\n\s*\d+ “.*$", "", t, flags=re.S)            # nota al pie del editor
-    t = re.sub(r"\[\d+\]|\[\.\.\.\]", " ", t)                   # foliación moderna y omisiones
+    t = re.sub(r"\[\.\.\.\]", " ", t)                           # omisiones del editor
+    # la foliación moderna [1045] sí está escrita (a lápiz) en el escaneo: se queda, sin corchetes
     t = re.sub(r"(\w)1\b", r"\1", t)                           # llamada de nota (gouernador1)
     t = t.replace("[", "").replace("]", "").replace("/", " ").replace("*", " ")
     return re.sub(r"\s+", " ", t.strip(" «»\n")).strip()
@@ -156,7 +168,7 @@ def bajar_documentos():
     filas, refs = [], {}
     for id_, tipo, origen, titulo, pagina, desc in DOCUMENTOS:
         ruta = destino / f"{id_}.jpg"
-        kw = {"iiurlparam": f"page{pagina}-1920px"} if pagina else {}
+        kw = {"iiurlparam": f"page{pagina}-1280px"} if pagina else {"iiurlwidth": 1920}
         r = api("commons.wikimedia.org", action="query", titles="File:" + titulo, prop="imageinfo|revisions",
                 iiprop="url|extmetadata|size", rvprop="content", rvslots="main", **kw)
         p = next(iter(r["query"]["pages"].values()))
@@ -168,7 +180,7 @@ def bajar_documentos():
         meta = ii.get("extmetadata", {})
         limpio = lambda k: re.sub(r"<[^>]+>|\s+", " ", meta.get(k, {}).get("value", "")).strip()
         if not ruta.exists():
-            img = Image.open(io.BytesIO(_get(ii["thumburl"] if pagina else ii["url"], pausa=3))).convert("RGB")
+            img = Image.open(io.BytesIO(_get(_url_imagen(ii, pagina), pausa=3))).convert("RGB")
             img.thumbnail((2400, 2400))  # suficiente para OCR y más liviano
             img.save(ruta, quality=92)
         if origen == "wikisource":
@@ -276,16 +288,17 @@ def bajar_openslr73(n_por_sexo=7, frases=11, semilla=2026):
 
     Además arma una entrevista simulada (dos hablantes que se turnan) para medir la diarización.
     """
+    from concurrent.futures import ThreadPoolExecutor
     destino = RAW / "audio"
     destino.mkdir(parents=True, exist_ok=True)
     pausa = np.zeros(int(0.6 * SR), dtype=np.float32)
-    filas, refs, turnos = [], {}, {}
+    filas, refs, turnos, tareas = [], {}, {}, []
     n = 9  # clip_009 en adelante
     for sexo in ["female", "male"]:
         url = OPENSLR73.format(sexo=sexo)
         z = zipfile.ZipFile(ZipRemoto(url))
         lineas = z.read("line_index.tsv").decode("utf-8").strip().splitlines()
-        tabla = pd.DataFrame([l.split("\t") for l in lineas], columns=["id", "texto"]).sort_values("id")
+        tabla = pd.DataFrame([l.split("	") for l in lineas], columns=["id", "texto"]).sort_values("id")
         tabla["hablante"] = tabla["id"].str.rsplit("_", n=1).str[0]
         cuenta = tabla["hablante"].value_counts()
         hablantes = sorted(cuenta[cuenta >= frases + 4].index)
@@ -293,24 +306,33 @@ def bajar_openslr73(n_por_sexo=7, frases=11, semilla=2026):
         rng.shuffle(hablantes)
         for h in hablantes[:n_por_sexo]:
             sel = tabla[tabla["hablante"] == h].head(frases)
-            partes, textos = [], []
-            for f in sel.itertuples():
-                partes += [_a_16k(z.read(f"{f.id}.wav")), pausa]
-                textos.append(f.texto.strip())
             id_ = f"clip_{n:03d}"
-            sf.write(destino / f"{id_}.wav", np.concatenate(partes), SR)
-            refs[id_] = {"texto": " ".join(textos), "procedencia": "Transcripción oficial de OpenSLR 73 (line_index.tsv)",
+            tareas.append((url, list(sel["id"]), destino / f"{id_}.wav"))
+            refs[id_] = {"texto": " ".join(t.strip() for t in sel["texto"]), "procedencia": "Transcripción oficial de OpenSLR 73 (line_index.tsv)",
                          "url": url, "frases": sel["id"].tolist()}
             filas.append({"id": id_, "modalidad": "audio", "fuente": "OpenSLR 73", "archivo_original": f"datos/raw/audio/{id_}.wav",
                           "descripcion": f"Lectura de {frases} frases, hablante {'mujer' if sexo == 'female' else 'hombre'} ({h})",
                           "titulo_original": f"es_pe_{sexo}.zip: " + ", ".join(sel["id"]), "autor": "Google (Guevara-Rukoz et al., 2020)",
                           "licencia": "CC BY-SA 4.0", "fuente_url": "https://www.openslr.org/73/",
                           "acceso": "descargar_datos.py: lectura parcial del zip con HTTP Range", "fecha_extraccion": FECHA})
-            print(id_, h, f"{sum(len(p) for p in partes) / SR:.0f} s")
             n += 1
         # el siguiente hablante sirve para la entrevista simulada
         h = hablantes[n_por_sexo]
-        turnos[sexo] = [(_a_16k(z.read(f"{f.id}.wav")), f.texto.strip(), f.id) for f in tabla[tabla["hablante"] == h].head(8).itertuples()]
+        turnos[sexo] = (url, [(f.id, f.texto.strip()) for f in tabla[tabla["hablante"] == h].head(8).itertuples()])
+
+    def leer(url, ids):  # cada hilo abre su propio zip remoto (el lector no es seguro entre hilos)
+        z = zipfile.ZipFile(ZipRemoto(url))
+        return [_a_16k(z.read(f"{i}.wav")) for i in ids]
+
+    def clip(url, ids, ruta):
+        if not ruta.exists():
+            sf.write(ruta, np.concatenate([x for a in leer(url, ids) for x in (a, pausa)]), SR)
+        print(ruta.stem, f"{sf.info(ruta).duration:.0f} s", flush=True)
+
+    with ThreadPoolExecutor(max_workers=8) as ex:
+        list(ex.map(lambda t: clip(*t), tareas))
+        sim = {s: ex.submit(leer, u, [i for i, _ in fr]) for s, (u, fr) in turnos.items()}
+        turnos = {s: [(x, t, i) for x, (i, t) in zip(sim[s].result(), turnos[s][1])] for s in turnos}
     # entrevista simulada: turnos alternados mujer/hombre
     audio, verdad, t = [], [], 0.0
     for (xa, ta, ia), (xb, tb, ib) in zip(turnos["female"], turnos["male"]):
@@ -332,11 +354,23 @@ def bajar_openslr73(n_por_sexo=7, frases=11, semilla=2026):
     return pd.DataFrame(filas), refs
 
 
+def _por_partes(nombre, funcion):
+    """Guarda el resultado de cada parte para poder reanudar si un servidor corta la descarga (HTTP 429)."""
+    tabla, refs = RAW / f"_parte_{nombre}.csv", RAW / f"_parte_{nombre}.json"
+    if tabla.exists():
+        return pd.read_csv(tabla), json.loads(refs.read_text(encoding="utf-8"))
+    salida = funcion()
+    df, r = salida if isinstance(salida, tuple) else (salida, {})
+    df.to_csv(tabla, index=False)
+    refs.write_text(json.dumps(r, ensure_ascii=False), encoding="utf-8")
+    return df, r
+
+
 if __name__ == "__main__":
     RAW.mkdir(parents=True, exist_ok=True)
-    docs, refs_docs = bajar_documentos()
-    aud_c = bajar_audio_commons()
-    aud_o, refs_aud = bajar_openslr73()
+    aud_o, refs_aud = _por_partes("openslr73", bajar_openslr73)
+    aud_c, _ = _por_partes("commons_audio", bajar_audio_commons)
+    docs, refs_docs = _por_partes("documentos", bajar_documentos)
     pd.concat([docs, aud_c, aud_o], ignore_index=True).to_csv(RAW / "inventario_fuentes.csv", index=False)
     (RAW / "referencias_humanas.json").write_text(json.dumps({**refs_docs, **refs_aud}, ensure_ascii=False, indent=1), encoding="utf-8")
     print(f"\n{len(docs)} documentos, {len(aud_c) + len(aud_o)} clips; referencias humanas: {len(refs_docs)} docs, {len(refs_aud)} clips")
