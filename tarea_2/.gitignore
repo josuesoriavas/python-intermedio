@@ -1,0 +1,15 @@
+# Corpus original y salidas pesadas (audios crudos, imágenes completas, cachés de modelos): no se suben a GitHub
+datos/raw/
+
+# Pesos de modelos (PaddleOCR ~2 GB, Whisper, Qwen3-ASR): se bajan de Hugging Face / PaddleX al ejecutar
+modelos/*.safetensors
+modelos/*.bin
+modelos/*.pt
+modelos/*.onnx
+modelos/checkpoint-*/
+
+# Entorno y credenciales
+.venv/
+.env
+__pycache__/
+.ipynb_checkpoints/
