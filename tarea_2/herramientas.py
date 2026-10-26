@@ -7,10 +7,15 @@ y la normalización común para CER/WER.
 from __future__ import annotations
 
 import json
+import os
 import re
 import time
 import unicodedata
 from pathlib import Path
+
+# Descargas de modelos: HTTP simple (Xet se trababa en esta red) y sin el chequeo de conectividad de PaddleX
+os.environ.setdefault("HF_HUB_DISABLE_XET", "1")
+os.environ.setdefault("PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK", "True")
 
 import torch  # noqa: F401  (en Windows, importar torch antes que paddle evita un error de DLL)
 import numpy as np
@@ -189,8 +194,9 @@ def personas_ner(texto: str, umbral: float = 0.85) -> list[str]:
     nombres = []
     for i in range(0, len(texto), 1500):  # el modelo acepta ~512 tokens
         for e in _ner(texto[i:i + 1500]):
-            if e["entity_group"] == "PER" and e["score"] >= umbral and len(e["word"]) > 3:
-                nombres.append(re.sub(r"\s+", " ", e["word"]).strip())
+            nombre = re.sub(r"\s+", " ", re.sub(r"^[#\W]+", "", e["word"])).strip()  # quita restos de subpalabras (##)
+            if e["entity_group"] == "PER" and e["score"] >= umbral and len(nombre) > 3:
+                nombres.append(nombre)
     return nombres
 
 
@@ -221,9 +227,20 @@ def normalizar(texto: str) -> str:
     return re.sub(r"\s+", " ", texto).strip()
 
 
+def normalizar_doc(texto: str) -> str:
+    """Para el CER de documentos: normalizar() + sin tildes ni diéresis y u/v como una misma letra.
+
+    Las placas están en mayúsculas sin tildes y escriben V por U (CIRCVLO, PERV), pero sus
+    transcripciones en Commons modernizan la ortografía; Guaman Poma también alterna u/v. Sin esto,
+    el CER castigaría al OCR por leer bien una convención gráfica. La ñ se conserva."""
+    t = normalizar(texto).replace("ñ", "\0")
+    t = "".join(c for c in unicodedata.normalize("NFD", t) if unicodedata.category(c) != "Mn")
+    return t.replace("\0", "ñ").replace("v", "u")
+
+
 def cer(ref: str, hip: str) -> float:
     import jiwer
-    return float(jiwer.cer(normalizar(ref), normalizar(hip) or "∅"))
+    return float(jiwer.cer(normalizar_doc(ref), normalizar_doc(hip) or "∅"))
 
 
 def wer(ref: str, hip: str) -> float:
@@ -234,7 +251,7 @@ def wer(ref: str, hip: str) -> float:
 def cer_corpus(refs, hips) -> float:
     """CER agregado (errores totales / caracteres totales), no el promedio de CER por documento."""
     import jiwer
-    return float(jiwer.cer([normalizar(r) for r in refs], [normalizar(h) or "∅" for h in hips]))
+    return float(jiwer.cer([normalizar_doc(r) for r in refs], [normalizar_doc(h) or "∅" for h in hips]))
 
 
 def wer_corpus(refs, hips) -> float:

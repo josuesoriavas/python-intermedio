@@ -4,7 +4,7 @@
 
 Qué baja a datos/raw/ (no se versiona en Git):
 
-- documentos/: 25 imágenes de documentos peruanos.
+- documentos/: 26 imágenes de documentos peruanos (25 + 1 reemplazo de un manuscrito ilegible).
   * 8 impresos nítidos: páginas escaneadas de Wikisource (Tradiciones peruanas de Ricardo Palma, 1893;
     Historia General del Perú del Inca Garcilaso; Ley de Reforma Agraria de 1969). Dominio público.
   * 8 fotos con inclinación, brillo o sombras: placas y un documento enmarcado fotografiados en Lima
@@ -76,6 +76,8 @@ DOCUMENTOS = [
     ("doc_023", "manuscrito", "commons", "Acta de Independencia Peru.jpg", None, "Acta de la Independencia del Perú (1821), original"),
     ("doc_024", "manuscrito", "commons", "Acta de la Indepencia del Perù.jpg", None, "Acta de la Independencia, facsímil fotografiado"),
     ("doc_025", "manuscrito", "commons", "Capitulacón de Ayacucho2.jpg", None, "Capitulación de Ayacucho (1824), página manuscrita"),
+    # reemplazo de doc_025, que resultó ilegible (362 × 550 px): se descarta en 01_extraccion.ipynb
+    ("doc_026", "manuscrito", "commons", "A khipucamayuc, 1615.jpg", None, "Guaman Poma (1615), el khipucamayoc"),
 ]
 
 # Archivos de Commons cuya descripción trae la transcripción humana del texto de la imagen
@@ -85,7 +87,8 @@ DESCRIPCION_ES_TRANSCRIPCION = {"doc_009", "doc_010", "doc_011", "doc_020", "doc
 COMMONS_AUDIO = [
     ("clip_001", "Entrevista 1 en la Av. Rivagüero - El Agustino.ogg", "Entrevista en la calle a una vendedora de frutas, El Agustino (2022)"),
     ("clip_002", "Entrevista 2 en la Av. Rivagüero - El Agustino.ogg", "Entrevista en la calle a dos vendedoras de dulces, El Agustino (2022)"),
-    ("clip_003", "Entrevista-Aurora Coronado-organización de mujeres indígenas-fiestas patrias.ogg", "Dirigente de una organización de mujeres indígenas en conferencia de prensa (2022)"),
+    # el título de este archivo en Commons contiene el nombre de la entrevistada: se identifica por su id de página
+    ("clip_003", 121219890, "Dirigente de una organización de mujeres indígenas en conferencia de prensa (2022)"),
     ("clip_004", "Entrevista 1,.wav", "Entrevista de un estudiante de la UNMSM por Fiestas Patrias (2022)"),
     ("clip_005", "Entrevista 2.wav", "Entrevista de un estudiante de la UNMSM por Fiestas Patrias (2022)"),
     ("clip_006", "Entrevista 3.wav", "Entrevista de un estudiante de la UNMSM por Fiestas Patrias (2022)"),
@@ -265,18 +268,21 @@ def bajar_audio_commons():
     destino.mkdir(parents=True, exist_ok=True)
     filas = []
     for id_, titulo, desc in COMMONS_AUDIO:
-        r = api("commons.wikimedia.org", action="query", titles="File:" + titulo, prop="imageinfo", iiprop="url|extmetadata")
+        por_id = isinstance(titulo, int)
+        kw = {"pageids": titulo} if por_id else {"titles": "File:" + titulo}
+        r = api("commons.wikimedia.org", action="query", prop="imageinfo", iiprop="url|extmetadata", **kw)
         ii = next(iter(r["query"]["pages"].values()))["imageinfo"][0]
         meta = ii["extmetadata"]
-        ext = Path(titulo).suffix.lower()
+        ext = Path(ii["url"].split("?")[0]).suffix.lower()
         original = destino / "original" / f"{id_}{ext}"
         original.parent.mkdir(exist_ok=True)
         if not original.exists():
             original.write_bytes(_get(ii["url"], pausa=3))
         filas.append({"id": id_, "modalidad": "audio", "fuente": "Wikimedia Commons", "archivo_original": f"datos/raw/audio/original/{id_}{ext}",
-                      "descripcion": desc, "titulo_original": titulo,
+                      "descripcion": desc, "titulo_original": "(omitido: contiene el nombre de la persona entrevistada)" if por_id else titulo,
                       "autor": re.sub(r"<[^>]+>", "", meta.get("Artist", {}).get("value", "")).strip(),
-                      "licencia": meta.get("LicenseShortName", {}).get("value", ""), "fuente_url": ii["descriptionurl"],
+                      "licencia": meta.get("LicenseShortName", {}).get("value", ""),
+                      "fuente_url": f"https://commons.wikimedia.org/?curid={titulo}" if por_id else ii["descriptionurl"],
                       "acceso": "descargar_datos.py: API de Wikimedia (imageinfo) y archivo original",
                       "fecha_extraccion": FECHA})
         print(id_, original.stat().st_size // 1024, "KB")
