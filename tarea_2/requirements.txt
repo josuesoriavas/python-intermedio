@@ -1,0 +1,7 @@
+# Dependencias SOLO para el dashboard (streamlit run app.py / Streamlit Community Cloud).
+# La app únicamente lee los CSV/JSON de datos/: no instala PaddleOCR, Whisper ni LLM.
+# Probado con Python 3.12 y 3.14.
+streamlit==1.66.0
+pandas==3.0.6
+numpy==2.5.4
+plotly==7.1.0
