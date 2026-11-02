@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>El Niño y el agro peruano</title>
+<meta name="description" content="Dashboard interactivo: cómo afectan los eventos El Niño costero a la producción agrícola del Perú (1961-2024). Datos de NOAA y FAOSTAT.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/estilos.css">
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <p class="eyebrow">Python Intermedio · Tarea 3 · Datos abiertos</p>
+    <h1>El Niño y el agro peruano</h1>
+    <p class="pregunta">¿Cómo afectan los eventos El Niño costero a la producción agrícola del Perú y qué cultivos son más vulnerables?</p>
+    <p class="intro">El Niño costero calienta el mar frente al Perú: trae lluvias e inundaciones a la costa norte, sequía al altiplano y calor que altera la floración de los frutales. Este tablero cruza <strong>76 años del índice costero ICEN</strong> con la <strong>producción de 27 cultivos (1961-2024)</strong> para medir quién pierde cuando llega El Niño.</p>
+    <div class="chips">
+      <span>📍 Perú (y 198 países en el mapa)</span>
+      <span>🗓️ Cultivos 1961-2024 · Temperatura del mar 1950-sep 2026</span>
+      <span>📊 Fuentes: NOAA CPC (ERSSTv5, OISST) · FAOSTAT (FAO)</span>
+    </div>
+  </div>
+</header>
+
+<div class="alerta wrap" id="alerta"></div>
+
+<main class="wrap">
+  <section class="kpis" id="kpis" aria-label="Indicadores principales"></section>
+
+  <section class="controles" aria-label="Filtros">
+    <label>Cultivo
+      <select id="f-cultivo"></select>
+    </label>
+    <label>Indicador
+      <select id="f-indicador">
+        <option value="produccion">Producción (t)</option>
+        <option value="rendimiento">Rendimiento (t/ha)</option>
+        <option value="area">Área cosechada (ha)</option>
+      </select>
+    </label>
+    <label>Años Niño a comparar
+      <select id="f-tipo">
+        <option value="mod">Moderado o mayor (ICEN ene-jun &gt; 1.0 °C)</option>
+        <option value="todos">Cualquier intensidad (ICEN ene-jun &gt; 0.4 °C)</option>
+      </select>
+    </label>
+    <label>Desde <span id="v-desde"></span>
+      <input type="range" id="f-desde" min="1961" max="2024" value="1961">
+    </label>
+    <label>Hasta <span id="v-hasta"></span>
+      <input type="range" id="f-hasta" min="1961" max="2024" value="2024">
+    </label>
+    <label>Grupo (ranking)
+      <select id="f-grupo">
+        <option>Todos</option><option>Agroexportación</option><option>Consumo interno</option><option>Industrial</option>
+      </select>
+    </label>
+    <button id="btn-descargar" type="button" title="Descarga la serie del cultivo seleccionado en el periodo filtrado">⬇ Descargar CSV</button>
+  </section>
+
+  <section class="grid">
+    <article class="card ancho">
+      <h2>1 · El termómetro del mar peruano: ICEN 1950-2026</h2>
+      <p class="nota">Anomalía de temperatura del mar en la región Niño 1+2 (frente a Perú y Ecuador), media móvil de 3 meses. Las líneas marcan los umbrales de ENFEN. La franja sombreada es el periodo filtrado.</p>
+      <div id="g-icen" class="graf"></div>
+    </article>
+
+    <article class="card ancho">
+      <h2 id="t-serie">2 · Serie del cultivo</h2>
+      <p class="nota">Barras naranjas: años con El Niño (según el filtro). Línea: tendencia (mediana de los 3 años anteriores y 3 posteriores).</p>
+      <div id="g-serie" class="graf"></div>
+    </article>
+
+    <article class="card">
+      <h2>3 · Ranking de vulnerabilidad</h2>
+      <p class="nota">Diferencia entre el desvío promedio en años Niño y en años sin Niño (puntos porcentuales). Haz clic en una barra para elegir el cultivo.</p>
+      <div id="g-ranking" class="graf alto"></div>
+    </article>
+
+    <article class="card">
+      <h2 id="t-disp">4 · Intensidad de El Niño vs. desvío</h2>
+      <p class="nota">Cada punto es un año. Eje X: ICEN promedio de enero a junio. Eje Y: desvío respecto a la tendencia.</p>
+      <div id="g-disp" class="graf alto"></div>
+    </article>
+
+    <article class="card ancho">
+      <div class="card-head">
+        <h2 id="t-mapa">5 · ¿Quién más pierde? Mapa mundial</h2>
+        <label class="inline">Año del mapa <select id="f-anio-mapa"></select></label>
+      </div>
+      <p class="nota">Desvío de la producción del cultivo seleccionado respecto a su tendencia, por país. Rojo = cayó, azul = subió. Gris: sin dato o productor muy pequeño (&lt; 500 t).</p>
+      <div id="g-mapa" class="graf mapa"></div>
+    </article>
+
+    <article class="card ancho">
+      <h2>6 · Mapa de calor: cultivos × años Niño</h2>
+      <p class="nota">Desvío del indicador seleccionado en los años con El Niño moderado o mayor y en el año siguiente a los grandes eventos.</p>
+      <div id="g-calor" class="graf calor"></div>
+    </article>
+  </section>
+
+  <section class="texto" id="hallazgos">
+    <h2>Tres hallazgos</h2>
+    <ol class="hallazgos">
+      <li><strong>Hay un Niño fuerte en curso.</strong> En septiembre de 2026 el mar frente al Perú (Niño 1+2) estaba <strong>4.7 °C</strong> por encima de lo normal (OISST, NOAA). El ICEN reconstruido llegó a <strong>1.98 °C en mayo de 2026</strong> (categoría fuerte), un nivel que solo superaron seis eventos desde 1950: 1957, 1972, 1982-83, 1997-98, 2015-16 y 2023-24.</li>
+      <li><strong>Algodón, quinua, mango, cebada y limón son los más golpeados.</strong> En los seis años con Niño moderado o mayor (1983, 1987, 1992, 1998, 2016 y 2023), la producción de algodón quedó en promedio <strong>24 % por debajo</strong> de su tendencia (+7 % en años sin Niño); la de quinua, <strong>22 % por debajo</strong> (+4 %); la de mango, <strong>17 % por debajo</strong> (+5 %); la de cebada, 14 % (+1 %), y la de limón, 8 % (+2 %). Las cinco diferencias son estadísticamente significativas (p &lt; 0.05, prueba de permutación). El daño no es solo costero: quinua y cebada son cultivos altoandinos que sufren la sequía que El Niño suele llevar al sur.</li>
+      <li><strong>La agroexportación moderna resiste mejor, pero el mango no.</strong> Palta, uva, espárrago, café y cacao no muestran pérdidas significativas en años Niño (p &gt; 0.10). En cambio, el mango, el frutal de la costa norte, cayó <strong>29 % en 2023 y 25 % en 2024</strong> respecto a su tendencia: dos campañas seguidas perdidas por un solo evento. En 1983, el algodón perdió el 62 % y el limón el 40 %.</li>
+    </ol>
+  </section>
+
+  <section class="texto dos-col">
+    <div>
+      <h2>Metodología</h2>
+      <ul>
+        <li><strong>ICEN reconstruido.</strong> Media móvil centrada de 3 meses de la anomalía de temperatura del mar en Niño 1+2 (ERSSTv5, base 1991-2020), la misma definición que usa ENFEN. Categorías ENFEN: cálida débil (&gt; 0.4 °C), moderada (&gt; 1.0), fuerte (&gt; 1.7) y extraordinaria (&gt; 3.0). Un <em>evento</em> son 3 o más meses seguidos en condición cálida.</li>
+        <li><strong>Intensidad del año.</strong> ICEN promedio de enero a junio, la temporada de lluvias en la costa norte y de la mayor parte de las cosechas. Años "Niño moderado o mayor": promedio &gt; 1.0 °C. Años "sin Niño": ≤ 0.4 °C.</li>
+        <li><strong>Desvío respecto a la tendencia.</strong> desvío(t) = valor(t) / mediana(t−3…t−1, t+1…t+3) − 1. Así se separa el golpe de un mal año del crecimiento de largo plazo.</li>
+        <li><strong>Vulnerabilidad.</strong> Desvío promedio en años Niño menos desvío promedio en años sin Niño. Significancia con una prueba de permutación (20 000 repeticiones).</li>
+        <li><strong>Limpieza.</strong> Se descartan registros sin dato (flag M), valores no positivos y duplicados; el rendimiento se pasa a t/ha y los países se identifican con su código ISO-3.</li>
+      </ul>
+    </div>
+    <div>
+      <h2>Fuentes</h2>
+      <ul>
+        <li>NOAA Climate Prediction Center, índices Niño mensuales ERSSTv5 (1950-hoy) y OISST v2 (1982-hoy): <a href="https://www.cpc.ncep.noaa.gov/data/indices/" target="_blank" rel="noopener">cpc.ncep.noaa.gov/data/indices</a>. Descargado el 1 de noviembre de 2026.</li>
+        <li>FAOSTAT (FAO), Producción de cultivos y ganadería (QCL), actualizado el 31 de diciembre de 2025: <a href="https://www.fao.org/faostat/es/#data/QCL" target="_blank" rel="noopener">fao.org/faostat/es/#data/QCL</a>.</li>
+        <li>Umbrales del ICEN: ENFEN, Nota Técnica 01-2012 (Comisión Multisectorial ENFEN, Perú).</li>
+      </ul>
+      <h2>Limitaciones</h2>
+      <ul>
+        <li>Los datos de FAOSTAT son anuales y nacionales: no permiten ver el daño por región ni por mes, y un año calendario mezcla dos campañas.</li>
+        <li>Es una asociación, no una prueba de causalidad: en los mismos años influyen precios, plagas, crédito, conflictos (p. ej., los años 80) y la expansión del riego.</li>
+        <li>Solo hay seis años con Niño moderado o mayor desde 1961; cada evento pesa mucho en los promedios.</li>
+        <li>El ICEN es una reconstrucción con ERSSTv5 (base 1991-2020); puede diferir unas décimas del valor oficial de ENFEN. El evento de 2026 todavía no tiene datos de cosecha.</li>
+        <li>Algunos valores de FAOSTAT son estimados o imputados por la FAO (columna <em>flag</em> en el CSV).</li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+<footer class="wrap pie">
+  <p>Elaborado por josuesoriavas · Curso Python Intermedio · Código y datos en <a href="https://github.com/josuesoriavas/python-intermedio/tree/main/tarea_3" target="_blank" rel="noopener">GitHub</a>. Hecho con apoyo de herramientas de IA (Claude Code); cifras verificadas contra las fuentes.</p>
+</footer>
+
+<script src="assets/app.js"></script>
+</body>
+</html>

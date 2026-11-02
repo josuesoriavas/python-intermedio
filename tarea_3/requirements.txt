@@ -1,0 +1,9 @@
+# Reproducir los datos (scripts/). El dashboard (web/) es HTML estático y no necesita Python.
+# Probado con Python 3.14.
+pandas==3.0.6
+numpy==2.5.4
+requests==2.34.2
+pycountry==26.2.16
+# Solo para generar las imágenes del reel
+plotly==7.1.0
+kaleido==1.5.0

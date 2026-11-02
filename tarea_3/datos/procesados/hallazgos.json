@@ -1,0 +1,127 @@
+{
+  "estado_actual": {
+    "mes": "2026-09",
+    "anomalia_nino12": 4.69,
+    "anomalia_nino34": 2.84,
+    "evento_inicio": "2026-02",
+    "icen_max": 1.98,
+    "mes_icen_max": "2026-05",
+    "magnitud": "fuerte"
+  },
+  "mas_vulnerables": [
+    {
+      "cultivo": "Algodón",
+      "zona": "Costa",
+      "desvio_nino": -0.2388,
+      "desvio_sin_nino": 0.0678,
+      "diferencia": -0.3065,
+      "p_valor": 0.0122
+    },
+    {
+      "cultivo": "Quinua",
+      "zona": "Sierra sur",
+      "desvio_nino": -0.2237,
+      "desvio_sin_nino": 0.0421,
+      "diferencia": -0.2658,
+      "p_valor": 0.0134
+    },
+    {
+      "cultivo": "Mango",
+      "zona": "Costa norte",
+      "desvio_nino": -0.1702,
+      "desvio_sin_nino": 0.0458,
+      "diferencia": -0.2161,
+      "p_valor": 0.0067
+    },
+    {
+      "cultivo": "Cebada",
+      "zona": "Sierra",
+      "desvio_nino": -0.1362,
+      "desvio_sin_nino": 0.0067,
+      "diferencia": -0.1429,
+      "p_valor": 0.0045
+    },
+    {
+      "cultivo": "Limón",
+      "zona": "Costa norte",
+      "desvio_nino": -0.08,
+      "desvio_sin_nino": 0.0231,
+      "diferencia": -0.1032,
+      "p_valor": 0.0413
+    }
+  ],
+  "agroexportacion": [
+    {
+      "cultivo": "Espárrago",
+      "desvio_nino": -0.0665,
+      "desvio_sin_nino": 0.0052,
+      "diferencia": -0.0716,
+      "p_valor": 0.1035
+    },
+    {
+      "cultivo": "Uva",
+      "desvio_nino": -0.0314,
+      "desvio_sin_nino": 0.0037,
+      "diferencia": -0.035,
+      "p_valor": 0.2275
+    },
+    {
+      "cultivo": "Café",
+      "desvio_nino": -0.0054,
+      "desvio_sin_nino": 0.0013,
+      "diferencia": -0.0067,
+      "p_valor": 0.4571
+    },
+    {
+      "cultivo": "Cacao",
+      "desvio_nino": 0.0127,
+      "desvio_sin_nino": 0.0031,
+      "diferencia": 0.0096,
+      "p_valor": 0.6026
+    },
+    {
+      "cultivo": "Palta",
+      "desvio_nino": 0.0309,
+      "desvio_sin_nino": -0.0164,
+      "diferencia": 0.0472,
+      "p_valor": 0.8815
+    }
+  ],
+  "evento_2023": {
+    "Mango": {
+      "2023": -0.2916,
+      "2024": -0.2497
+    },
+    "Limón": {
+      "2023": -0.1508,
+      "2024": 0.241
+    },
+    "Algodón": {
+      "2023": 0.5766,
+      "2024": -0.3154
+    },
+    "Arroz": {
+      "2023": -0.0241,
+      "2024": 0.07
+    },
+    "Quinua": {
+      "2023": -0.3415,
+      "2024": 0.0721
+    }
+  },
+  "evento_1983": {
+    "Algodón": -0.6161,
+    "Limón": -0.3967,
+    "Mango": -0.3195,
+    "Quinua": -0.3675,
+    "Papa": -0.1804
+  },
+  "anios_nino_moderado": [
+    1983,
+    1987,
+    1992,
+    1998,
+    2016,
+    2023
+  ]
+}

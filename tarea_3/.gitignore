@@ -1,0 +1,7 @@
+# Archivo masivo de FAOSTAT (~33 MB comprimido): se baja con scripts/obtener_datos.py
+datos/originales/*.zip
+datos/originales/*.part
+
+# Audio de referencia de la voz (dato personal) y temporales del reel
+reel/recursos/voz_referencia*
+reel/tmp/

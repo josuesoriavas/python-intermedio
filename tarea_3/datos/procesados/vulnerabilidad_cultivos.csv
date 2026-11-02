@@ -1,0 +1,26 @@
+cod_cultivo,cultivo,grupo,zona,anios_nino,anios_sin_nino,desvio_nino,desvio_sin_nino,diferencia,p_valor,correlacion_icen,peor_anio,peor_desvio
+328,Algodón,Industrial,Costa,6,50,-0.2388,0.0678,-0.3065,0.0122,-0.3681,1983,-0.6161
+92,Quinua,Consumo interno,Sierra sur,6,50,-0.2237,0.0421,-0.2658,0.0134,-0.1208,1992,-0.6936
+571,Mango,Agroexportación,Costa norte,6,50,-0.1702,0.0458,-0.2161,0.0067,-0.3483,2009,-0.4693
+44,Cebada,Consumo interno,Sierra,6,50,-0.1362,0.0067,-0.1429,0.0045,-0.3202,1992,-0.4329
+497,Limón,Consumo interno,Costa norte,6,50,-0.08,0.0231,-0.1032,0.0413,-0.2571,1983,-0.3967
+156,Caña de azúcar,Industrial,Costa norte,6,50,-0.0683,0.0095,-0.0777,0.0286,-0.1407,1981,-0.2266
+367,Espárrago,Agroexportación,Costa,6,50,-0.0665,0.0052,-0.0716,0.1035,-0.1697,1980,-0.3957
+116,Papa,Consumo interno,Sierra,6,50,-0.0649,0.0066,-0.0715,0.0808,-0.1747,1992,-0.3698
+15,Trigo,Consumo interno,Sierra,6,50,-0.061,0.0081,-0.0691,0.125,-0.1568,1990,-0.3095
+176,Frijol,Consumo interno,"Costa, sierra y selva",6,50,-0.0551,0.0105,-0.0656,0.0563,-0.1809,1992,-0.217
+490,Naranja,Consumo interno,Selva central y costa,6,50,-0.0499,0.0033,-0.0532,0.0702,-0.2378,1992,-0.3343
+56,Maíz grano,Consumo interno,"Costa, sierra y selva",6,50,-0.0537,-0.0007,-0.053,0.1509,-0.113,1963,-0.2791
+403,Cebolla,Consumo interno,Costa sur,6,50,-0.0555,-0.0052,-0.0503,0.1369,-0.0858,1961,-0.3644
+689,Ají y páprika secos,Agroexportación,Costa,4,26,0.0476,0.0942,-0.0466,0.5623,-0.0218,2001,-0.803
+446,Choclo,Consumo interno,Sierra y costa,6,50,-0.0376,0.0086,-0.0462,0.0902,-0.1299,1968,-0.2627
+388,Tomate,Consumo interno,Costa,6,50,-0.0244,0.0141,-0.0385,0.31,-0.0263,1963,-0.4051
+27,Arroz,Consumo interno,Costa norte y selva,6,50,-0.0221,0.0133,-0.0354,0.3091,-0.0825,1968,-0.3681
+560,Uva,Agroexportación,Costa,6,50,-0.0314,0.0037,-0.035,0.2275,-0.1827,1984,-0.2953
+495,Mandarina,Agroexportación,Costa central,6,50,-0.0215,0.0017,-0.0232,0.2563,-0.1801,1998,-0.2203
+574,Piña,Consumo interno,Selva central,6,50,-0.0213,-0.0025,-0.0188,0.3151,-0.0666,1979,-0.1705
+656,Café,Agroexportación,Selva,6,50,-0.0054,0.0013,-0.0067,0.4571,-0.0164,2014,-0.2573
+122,Camote,Consumo interno,Costa,6,50,-0.0099,-0.0063,-0.0036,0.4845,0.0416,1985,-0.2603
+661,Cacao,Agroexportación,Selva,6,50,0.0127,0.0031,0.0096,0.6026,-0.0008,1994,-0.2312
+125,Yuca,Consumo interno,Selva,6,50,0.022,-0.0008,0.0229,0.767,0.0797,1968,-0.1759
+572,Palta,Agroexportación,Costa y sierra,6,50,0.0309,-0.0164,0.0472,0.8815,0.155,1994,-0.3269

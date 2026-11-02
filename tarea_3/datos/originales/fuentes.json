@@ -1,0 +1,26 @@
+{
+  "ersst5_nino": {
+    "url": "https://www.cpc.ncep.noaa.gov/data/indices/ersst5.nino.mth.91-20.ascii",
+    "archivo": "ersst5.nino.mth.91-20.ascii",
+    "descripcion": "NOAA CPC - ERSSTv5, índices Niño mensuales 1950-hoy (anomalías base 1991-2020)",
+    "pagina": "https://www.cpc.ncep.noaa.gov/data/indices/",
+    "bytes": 67087,
+    "descargado_utc": "2026-11-02 03:24"
+  },
+  "oisst_nino": {
+    "url": "https://www.cpc.ncep.noaa.gov/data/indices/sstoi.indices",
+    "archivo": "sstoi.indices",
+    "descripcion": "NOAA CPC - OISST v2, índices Niño mensuales 1982-hoy",
+    "pagina": "https://www.cpc.ncep.noaa.gov/data/indices/",
+    "bytes": 39272,
+    "descargado_utc": "2026-11-02 03:24"
+  },
+  "faostat_qcl": {
+    "url": "https://bulks-faostat.fao.org/production/Production_Crops_Livestock_E_All_Data_(Normalized).zip",
+    "archivo": "Production_Crops_Livestock_E_All_Data_(Normalized).zip",
+    "descripcion": "FAOSTAT QCL - Producción de cultivos y ganadería, todos los países (formato largo)",
+    "pagina": "https://www.fao.org/faostat/es/#data/QCL",
+    "bytes": 33921825,
+    "descargado_utc": "2026-11-02 03:24"
+  }
+}
