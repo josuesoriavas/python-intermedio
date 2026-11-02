@@ -5,15 +5,28 @@
 | | |
 |---|---|
 | **Dashboard público** | https://josuesoriavas.github.io/python-intermedio/tarea_3/web/ |
-| **Publicación de LinkedIn** | _(pendiente: se agrega al publicar el reel)_ |
+| **Reel (ver en línea, público)** | https://josuesoriavas.github.io/python-intermedio/tarea_3/reel/reel.mp4 |
+| **Publicación de LinkedIn** | No se publicó en LinkedIn. Se usa la alternativa del enunciado: reel público en el enlace de arriba, y capturas del dashboard y hallazgos en este README ([ver abajo](#entrega-sin-linkedin)). |
 | **Código y datos** | esta carpeta (`tarea_3/`) |
-| **Reel** | [`reel/reel.mp4`](reel/reel.mp4) · guion en [`reel/guion.json`](reel/guion.json) · subtítulos en [`reel/subtitulos.srt`](reel/subtitulos.srt) |
+| **Archivos del reel** | [`reel/reel.mp4`](reel/reel.mp4) · guion en [`reel/guion.json`](reel/guion.json) · subtítulos en [`reel/subtitulos.srt`](reel/subtitulos.srt) |
 
 ![Inicio del dashboard: pregunta, alerta del Niño 2026, KPIs, filtros e índice ICEN](capturas/dashboard_inicio.png)
 
 ![Serie del cultivo, ranking de vulnerabilidad y dispersión ICEN vs. desvío](capturas/dashboard_graficos.png)
 
 ![Mapa mundial del desvío de la producción y mapa de calor cultivos × años Niño](capturas/dashboard_mapa.png)
+
+## Entrega sin LinkedIn
+
+Según la alternativa del enunciado, el reel se entrega en un enlace público que no pide permisos: https://josuesoriavas.github.io/python-intermedio/tarea_3/reel/reel.mp4 (65 s, vertical 1080×1920, con subtítulos, música y aviso de voz sintética). Este README incluye:
+
+- **Imágenes del dashboard:** las tres capturas de arriba (inicio con KPIs e ICEN; serie, ranking y dispersión; mapa mundial y mapa de calor).
+- **Hallazgos principales** (detalle en [Tres hallazgos principales](#tres-hallazgos-principales)):
+  1. En los años con Niño costero moderado o mayor, la producción de **algodón** quedó en promedio **24 % por debajo** de su tendencia, la de **quinua 22 %** y la de **mango 17 %**. En los años sin Niño, esos cultivos crecieron (p < 0.05).
+  2. El **mango** perdió dos campañas seguidas con un solo evento: **−29 % en 2023 y −25 % en 2024**. Palta, uva, espárrago, café y cacao, en cambio, no muestran pérdidas significativas.
+  3. Hay un **Niño costero fuerte en curso**: en septiembre de 2026 el mar frente al Perú estaba **+4.7 °C** sobre lo normal.
+
+El texto que se había preparado para la publicación quedó en [`reel/publicacion_linkedin.md`](reel/publicacion_linkedin.md) como referencia.
 
 ## Tema y pregunta de investigación
 
