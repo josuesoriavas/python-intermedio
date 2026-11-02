@@ -7,6 +7,13 @@
 | **Dashboard público** | https://josuesoriavas.github.io/python-intermedio/tarea_3/web/ |
 | **Publicación de LinkedIn** | _(pendiente: se agrega al publicar el reel)_ |
 | **Código y datos** | esta carpeta (`tarea_3/`) |
+| **Reel** | [`reel/reel.mp4`](reel/reel.mp4) · guion en [`reel/guion.json`](reel/guion.json) · subtítulos en [`reel/subtitulos.srt`](reel/subtitulos.srt) |
+
+![Inicio del dashboard: pregunta, alerta del Niño 2026, KPIs, filtros e índice ICEN](capturas/dashboard_inicio.png)
+
+![Serie del cultivo, ranking de vulnerabilidad y dispersión ICEN vs. desvío](capturas/dashboard_graficos.png)
+
+![Mapa mundial del desvío de la producción y mapa de calor cultivos × años Niño](capturas/dashboard_mapa.png)
 
 ## Tema y pregunta de investigación
 
@@ -87,6 +94,24 @@ python -m http.server 8000 --directory web   # abre http://localhost:8000
 ```
 
 El dashboard es estático: GitHub Pages sirve la carpeta `web/` sin servidor ni Python.
+
+### Reel (voz clonada, subtítulos y video)
+
+Usa el flujo de la [Sesión 15](https://github.com/d2cml-ai/Data-Science-Python/tree/main/sessions/15-texto-a-reel) (copiado en `reel/clase/`) en un entorno propio, porque `qwen-tts` fija su versión de `transformers`:
+
+```bash
+cd tarea_3/reel
+uv venv .venv --python 3.12
+uv pip install --python .venv/Scripts/python.exe qwen-tts faster-whisper pillow imageio-ffmpeg soundfile num2words jiwer
+../../.venv/Scripts/python graficos_reel.py      # gráficos de cada escena + música de fondo (con el entorno principal)
+.venv/Scripts/python hacer_reel.py --voz recursos/voz_referencia.m4a --autor "josuesoriavas"
+```
+
+- **Guion** (`guion.json`): 7 escenas. Cada cifra trae en `fuente_cifra` el archivo y el valor del que sale.
+- **Voz:** Qwen3-TTS 0.6B (Alibaba, Apache 2.0) clona mi voz a partir de una grabación propia de unos 20 segundos, que no se sube al repositorio.
+- **Subtítulos y control de calidad:** faster-whisper transcribe la narración; el WER de cada escena queda en `control_calidad.json`.
+- **Video:** 1080×1920 armado con Pillow y ffmpeg. Lleva un gráfico o captura del dashboard en cada escena, música de fondo por debajo de la voz, el aviso "voz generada con IA" y la fuente de los datos.
+- **Música:** pista ambiental sintetizada con numpy en `graficos_reel.py`, así que no tiene derechos de terceros.
 
 ## Estructura
 

@@ -1,0 +1,56 @@
+{
+  "titulo": "El Niño y el agro peruano",
+  "escenas": [
+    {
+      "frase": "Ahora mismo, el mar frente al Perú está cuatro coma siete grados más caliente de lo normal. El Niño costero ya llegó. ¿Qué le hará al campo?",
+      "cifra": "+4.7 °C",
+      "etiqueta": "Mar frente al Perú, septiembre 2026",
+      "imagen": "recursos/esc1_mar_hoy.png",
+      "fuente_cifra": "NOAA OISST, anomalía Niño 1+2 de sep-2026: +4.69 °C"
+    },
+    {
+      "frase": "Crucé setenta y seis años de temperatura del mar con sesenta y cuatro años de cosechas de veintisiete cultivos peruanos.",
+      "cifra": "1961-2024",
+      "etiqueta": "27 cultivos · NOAA + FAOSTAT",
+      "imagen": "recursos/esc2_icen.png",
+      "fuente_cifra": "ERSSTv5 1950-2026; FAOSTAT QCL 1961-2024"
+    },
+    {
+      "frase": "En los años con Niño fuerte, el algodón produjo veinticuatro por ciento menos que su tendencia. La quinua, veintidós por ciento menos. El mango, diecisiete.",
+      "cifra": "-24 %",
+      "etiqueta": "Algodón en años Niño",
+      "imagen": "recursos/esc3_ranking.png",
+      "fuente_cifra": "vulnerabilidad_cultivos.csv: algodón -23.9 %, quinua -22.4 %, mango -17.0 %"
+    },
+    {
+      "frase": "El mango es el caso más claro: con el Niño de dos mil veintitrés cayó casi treinta por ciento, y al año siguiente volvió a caer. Dos campañas perdidas.",
+      "cifra": "-29 %",
+      "etiqueta": "Mango en 2023 (y -25 % en 2024)",
+      "imagen": "recursos/esc4_mango.png",
+      "fuente_cifra": "hallazgos.json: mango 2023 -29.2 %, 2024 -25.0 % vs. tendencia"
+    },
+    {
+      "frase": "Y no es solo la costa: en el altiplano, El Niño suele traer sequía, y la quinua y la cebada también lo sufren.",
+      "cifra": "",
+      "etiqueta": "También golpea al altiplano",
+      "imagen": "recursos/esc5_sierra.png",
+      "fuente_cifra": "quinua -22.4 % y cebada -13.6 % en años Niño (p < 0.05)"
+    },
+    {
+      "frase": "En cambio, la palta, la uva y el café casi no muestran pérdidas en esos años.",
+      "cifra": "",
+      "etiqueta": "La agroexportación resiste mejor",
+      "imagen": "recursos/esc6_agroexport.png",
+      "fuente_cifra": "palta +3.1 %, uva -3.1 %, café -0.5 % en años Niño; ninguna diferencia significativa"
+    },
+    {
+      "frase": "Explora los datos por cultivo, por año y por país en mi dashboard. El enlace está en la publicación.",
+      "cifra": "",
+      "etiqueta": "Explora el dashboard",
+      "imagen": "recursos/esc7_dashboard.png",
+      "fuente_cifra": "josuesoriavas.github.io/python-intermedio/tarea_3/web"
+    }
+  ],
+  "hashtags": ["#FenomenoElNino", "#Agricultura", "#Peru", "#DataScience", "#DatosAbiertos", "#Python"],
+  "verificacion": "Cada cifra del guion se revisó contra datos/procesados/hallazgos.json y vulnerabilidad_cultivos.csv (campo fuente_cifra)."
+}
