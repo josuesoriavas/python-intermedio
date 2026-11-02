@@ -1,23 +1,31 @@
-"""Reel vertical 1080x1920: guion.json -> voz clonada -> subtítulos -> video con gráficos y música.
+"""Reel vertical 1080x1920: guion.json -> narración -> subtítulos -> video con gráficos y música.
 
-Reutiliza el pipeline de la Sesión 15 (clase/reel.py: Qwen3-TTS para clonar la voz y Whisper para
-subtítulos y control de calidad) y le agrega lo que pide la Tarea 3:
+Reutiliza el pipeline de la Sesión 15 (clase/reel.py: narración por escena, control de calidad y
+subtítulos con Whisper) y le agrega lo que pide la Tarea 3:
   - un gráfico o captura del dashboard por escena, con un zoom lento (efecto Ken Burns),
   - música de fondo (recursos/musica_fondo.wav, sintetizada en graficos_reel.py) por debajo de la voz,
-  - aviso "VOZ GENERADA CON IA", fuente de los datos y créditos en pantalla.
+  - aviso de voz sintética, fuente de los datos y créditos en pantalla.
+
+La narración usa una voz masculina genérica de Windows (Microsoft Pablo, es-ES) mediante
+voz_windows.ps1: no clona a ninguna persona ni necesita descargar modelos. Con --voz se puede
+volver al flujo de clase (Qwen3-TTS clonando una grabación propia).
 
 Uso (desde tarea_3/reel, con el entorno de la sesión 15):
-    .venv/Scripts/python hacer_reel.py --voz recursos/voz_referencia.m4a --autor "josuesoriavas"
+    .venv/Scripts/python hacer_reel.py                      # voz genérica de Windows
+    .venv/Scripts/python hacer_reel.py --voz mi_voz.m4a     # voz propia clonada con Qwen3-TTS
 """
 from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 import sys
+import tempfile
 import time
 from pathlib import Path
 
+os.environ.setdefault("HF_HUB_OFFLINE", "1")   # Whisper ya está en caché; no consultar Hugging Face
 import soundfile as sf
 from PIL import Image, ImageDraw
 
@@ -28,15 +36,37 @@ import reel as R  # noqa: E402  (pipeline de la sesión 15)
 R.FUENTES = AQUI / "recursos" / "fuentes"
 ANCHO, ALTO, FPS, MARGEN = R.ANCHO, R.ALTO, R.FPS, R.MARGEN
 FUENTE_DATOS = "NOAA CPC (ERSSTv5, OISST) y FAOSTAT (FAO)"
-CREDITOS = "Música: pista sintetizada con código para este reel (sin derechos de terceros) · Gráficos y dashboard: elaboración propia"
+CREDITOS = ("Voz: Microsoft Pablo (texto a voz de Windows) · Música: pista sintetizada con código para este reel "
+            "(sin derechos de terceros) · Gráficos y dashboard: elaboración propia")
+AVISO = "VOZ SINTÉTICA GENERADA POR COMPUTADORA"
 Y_IMG, ALTO_IMG, Y_SUB = 720, 600, 1400
+
+
+class VozWindows:
+    """Voz genérica masculina de Windows (OneCore). Misma interfaz que reel.Voz: decir(frases) -> lista de audios."""
+
+    def __init__(self, nombre="Pablo", velocidad="+0%"):
+        self.nombre, self.velocidad, self.sr = nombre, velocidad, 16000
+        self.texto_ref = f"(voz del sistema: Microsoft {nombre})"
+        self.carpeta = Path(tempfile.mkdtemp())
+
+    def decir(self, frases, estilos=None):
+        wavs = []
+        for k, f in enumerate(frases):
+            salida = self.carpeta / f"escena_{k}_{time.time_ns()}.wav"
+            subprocess.run(["powershell.exe", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File",
+                            str(AQUI / "voz_windows.ps1"), "-Texto", f, "-Salida", str(salida),
+                            "-Voz", self.nombre, "-Velocidad", self.velocidad], check=True, capture_output=True)
+            audio, self.sr = sf.read(salida, dtype="float32")
+            wavs.append(audio if audio.ndim == 1 else audio.mean(axis=1))
+        return wavs
 
 
 def base(titulo, autor):
     img = Image.new("RGB", (ANCHO, ALTO), R.FONDO)
     d = ImageDraw.Draw(img)
     d.text((MARGEN, 250), titulo.upper(), font=R._fuente("PublicSans", 40, 800), fill=R.ACENTO)
-    aviso = "VOZ GENERADA CON IA A PARTIR DE MI VOZ"
+    aviso = AVISO
     f = R._fuente("PublicSans", 28, 700)
     x1 = MARGEN + d.textlength(aviso, font=f) + 36
     d.rounded_rectangle((MARGEN, 315, x1, 365), radius=25, outline=R.SUAVE, width=2)
@@ -155,7 +185,9 @@ def video(guion, narr, ruta, autor, musica, vol_musica=0.10):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--voz", required=True, help="tu grabación de 15 a 25 s (m4a, opus, ogg, wav)")
+    ap.add_argument("--voz", help="grabación propia de 15 a 25 s para clonar con Qwen3-TTS (si se omite: voz de Windows)")
+    ap.add_argument("--voz-sistema", default="Pablo", help="voz de Windows OneCore (por defecto Microsoft Pablo, es-ES)")
+    ap.add_argument("--ritmo", default="+0%", help="velocidad SSML de la voz de Windows, p. ej. +8%%")
     ap.add_argument("--autor", default="josuesoriavas")
     ap.add_argument("--tts", default="Qwen/Qwen3-TTS-12Hz-0.6B-Base")
     ap.add_argument("--asr", default="small", help="modelo de faster-whisper (small ya está en caché; large-v3-turbo es mejor)")
@@ -165,8 +197,16 @@ def main():
     t0 = time.time()
 
     guion = json.loads((AQUI / "guion.json").read_text(encoding="utf-8"))
-    voz = R.Voz(args.voz, modelo=args.tts)
-    R._reloj(f"voz clonada; Whisper oyó en tu grabación: «{voz.texto_ref}»", t0)
+    if args.voz:
+        global AVISO, CREDITOS
+        AVISO = "VOZ GENERADA CON IA A PARTIR DE MI VOZ"
+        CREDITOS = CREDITOS.replace("Microsoft Pablo (texto a voz de Windows)", "Qwen3-TTS (clon de mi voz)")
+        voz = R.Voz(args.voz, modelo=args.tts)
+        args.tts_usado = args.tts
+    else:
+        voz = VozWindows(args.voz_sistema, args.ritmo)
+        args.tts_usado = f"Windows OneCore: Microsoft {args.voz_sistema}"
+    R._reloj(f"voz lista {voz.texto_ref}", t0)
     narr = R.narrar(voz, guion, velocidad=args.velocidad)
     R._reloj(f"narración lista: {narr.duracion:.1f} s; WER por escena: {[round(e['wer'], 2) for e in guion['escenas']]}", t0)
     R.subtitulos(narr, guion)
@@ -175,7 +215,7 @@ def main():
     video(guion, narr, AQUI / "reel.mp4", args.autor, AQUI / "recursos" / "musica_fondo.wav")
     R._reloj("reel.mp4 listo", t0)
     control = {"duracion_s": round(narr.duracion, 1), "texto_referencia": voz.texto_ref,
-               "wer_por_escena": [round(e["wer"], 3) for e in guion["escenas"]], "tts": args.tts, "asr": args.asr}
+               "wer_por_escena": [round(e["wer"], 3) for e in guion["escenas"]], "tts": args.tts_usado, "asr": args.asr}
     (AQUI / "control_calidad.json").write_text(json.dumps(control, ensure_ascii=False, indent=2), encoding="utf-8")
 
 

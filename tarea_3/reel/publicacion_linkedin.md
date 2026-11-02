@@ -23,7 +23,7 @@ Es una asociación estadística con datos anuales y nacionales, no una prueba de
 📊 Dashboard interactivo (filtra por cultivo, años e indicador; incluye un mapa mundial): https://josuesoriavas.github.io/python-intermedio/tarea_3/web/
 💻 Código y datos: https://github.com/josuesoriavas/python-intermedio/tree/main/tarea_3
 
-🎙️ La voz del reel fue generada con IA (Qwen3-TTS) a partir de mi propia voz.
+🎙️ La narración del reel es una voz sintética generada por computadora (texto a voz).
 Proyecto del curso Python Intermedio.
 
 #FenomenoElNino #Agricultura #Peru #DataScience #DatosAbiertos #Python

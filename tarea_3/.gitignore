@@ -5,3 +5,5 @@ datos/originales/*.part
 # Audio de referencia de la voz (dato personal) y temporales del reel
 reel/recursos/voz_referencia*
 reel/tmp/
+reel/reel.wav
+reel/.venv/

@@ -104,12 +104,12 @@ cd tarea_3/reel
 uv venv .venv --python 3.12
 uv pip install --python .venv/Scripts/python.exe qwen-tts faster-whisper pillow imageio-ffmpeg soundfile num2words jiwer
 ../../.venv/Scripts/python graficos_reel.py      # gráficos de cada escena + música de fondo (con el entorno principal)
-.venv/Scripts/python hacer_reel.py --voz recursos/voz_referencia.m4a --autor "josuesoriavas"
+.venv/Scripts/python hacer_reel.py                 # voz masculina genérica de Windows (Microsoft Pablo)
 ```
 
-- **Guion** (`guion.json`): 7 escenas. Cada cifra trae en `fuente_cifra` el archivo y el valor del que sale.
-- **Voz:** Qwen3-TTS 0.6B (Alibaba, Apache 2.0) clona mi voz a partir de una grabación propia de unos 20 segundos, que no se sube al repositorio.
-- **Subtítulos y control de calidad:** faster-whisper transcribe la narración; el WER de cada escena queda en `control_calidad.json`.
+- **Guion** (`guion.json`): 7 escenas, 65 segundos. Cada cifra trae en `fuente_cifra` el archivo y el valor del que sale.
+- **Voz:** una voz masculina **sintética y genérica**, Microsoft Pablo (texto a voz de Windows, es-ES), generada con `voz_windows.ps1`. No clona la voz de ninguna persona. Decidí no usar mi propia voz. El pipeline también admite el flujo de clase (`--voz mi_grabacion.m4a`, que clona la voz con Qwen3-TTS), pero hoy la descarga del modelo desde Hugging Face no era viable: unos 57 KB/s para 2.5 GB.
+- **Subtítulos y control de calidad:** faster-whisper (`small`) transcribe la narración y da los tiempos de cada palabra. El WER por escena fue de 0 a 0.12 y queda en `control_calidad.json`.
 - **Video:** 1080×1920 armado con Pillow y ffmpeg. Lleva un gráfico o captura del dashboard en cada escena, música de fondo por debajo de la voz, el aviso "voz generada con IA" y la fuente de los datos.
 - **Música:** pista ambiental sintetizada con numpy en `graficos_reel.py`, así que no tiene derechos de terceros.
 
@@ -129,4 +129,4 @@ tarea_3/
 
 ## Uso de inteligencia artificial
 
-Usé **Claude Code** (Anthropic) para buscar y comparar fuentes de datos, escribir los scripts de descarga, limpieza y análisis, construir el dashboard y redactar el guion del reel. La narración del reel se genera con un modelo de clonación de voz a partir de una grabación de mi propia voz, y el video lo indica. Revisé las cifras del dashboard, del README y del guion contra los archivos procesados, y la clasificación de eventos contra los registros de ENFEN. La responsabilidad sobre los resultados es mía.
+Usé **Claude Code** (Anthropic) para buscar y comparar fuentes de datos, escribir los scripts de descarga, limpieza y análisis, construir el dashboard y redactar el guion del reel. La narración del reel usa una voz sintética genérica (texto a voz de Windows), no una voz clonada, y el video lo indica en pantalla. Revisé las cifras del dashboard, del README y del guion contra los archivos procesados, y la clasificación de eventos contra los registros de ENFEN. La responsabilidad sobre los resultados es mía.
