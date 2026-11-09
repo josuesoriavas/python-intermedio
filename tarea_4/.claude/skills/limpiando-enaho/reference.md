@@ -39,7 +39,10 @@ El zip 34 también trae `sumaria-2024-12g.dta` (gasto en 12 grupos): no se usa.
 | `edad`, `grupo_edad` | `p208a` | años; 0-14, 15-29, 30-44, 45-64, 65 y más |
 | `p203` | parentesco con el jefe | 1 jefe/a, 2 cónyuge, 3 hijo/a, … |
 | `sexo_jefe` | `p207` del jefe (`p203 == 1`) | Jefe hombre / Jefa mujer |
+| `condicion_pobreza` | `pobreza` | Pobre extremo / Pobre no extremo / No pobre |
 | `gasto_pc_mensual` | `gashog2d / mieperho / 12` | soles corrientes por persona al mes |
+| `gasto_alimentos` | suma del grupo 1 (ver abajo) | soles corrientes al año, por hogar |
+| `participacion_alimentos` | `100 × gasto_alimentos / gashog2d` | % del gasto total bruto del hogar destinado a alimentos |
 | `linea`, `linpe` | sumaria | línea de pobreza total y extrema (S/ por persona al mes) |
 | `facpob07` | módulo 02 | factor de expansión de personas |
 | `factor07`, `mieperho` | sumaria | factor del hogar y número de miembros |
@@ -61,6 +64,18 @@ El zip 34 también trae `sumaria-2024-12g.dta` (gasto en 12 grupos): no se usa.
 | Urbana / rural | 24.74 % / 39.44 % | 24.81 % / 39.30 % | 24.8 % / 39.3 % |
 | Pobreza extrema | 5.50 % | — | 5.5 % |
 | Lima Metropolitana | 28.03 % | 28.21 % | 28.2 % |
+
+## Gasto en alimentos (grupo 1)
+
+Se construye como en el do-file oficial del INEI que viene en el zip 34
+(`ConstVarGasto-Metodologia actualizada.zip` → `01.ConstrVarGastoIngreso2014-2024.do`, variables `gpcrg3`, `gpcrg8` y
+`gpcrg9`), pero en soles corrientes y sin deflactar:
+
+- dentro del hogar: `gru11hd + gru12hd1 + gru12hd2 + gru13hd1 + gru13hd2 + gru13hd3`
+- fuera del hogar: `sg23 + sig24 + gru14hd + gru14hd1 + gru14hd2 + gru14hd3 + gru14hd4 + gru14hd5 + sg25 + sig26 + sg27 + sig28`
+
+`participacion_alimentos` es ese total entre `gashog2d` (gasto total bruto). Indica qué tan expuesto está el
+presupuesto del hogar a los precios de los alimentos; promediada por persona con `facpob07`.
 
 ## Error estándar
 

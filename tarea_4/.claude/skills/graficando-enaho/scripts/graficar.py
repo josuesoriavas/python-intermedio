@@ -27,16 +27,38 @@ import pandas as pd  # noqa: E402
 PROYECTO = Path(__file__).resolve().parents[4]
 LIMPIEZA = PROYECTO / ".claude" / "skills" / "limpiando-enaho" / "scripts"
 sys.path.insert(0, str(LIMPIEZA))
-from estimacion import proporcion  # noqa: E402
+from estimacion import media, proporcion  # noqa: E402
 
 FIGURAS = PROYECTO / "figuras"
 AZUL, NARANJA, GRIS, TINTA, TINTA2, FONDO = "#2a78d6", "#eb6834", "#8a8984", "#0b0b0b", "#52514e", "#fcfcfb"
 ORDEN = {"grupo_edad": ["0-14", "15-29", "30-44", "45-64", "65 y más"], "area": ["Urbana", "Rural"],
-         "region_natural": ["Lima Metropolitana", "Costa", "Sierra", "Selva"]}
+         "region_natural": ["Lima Metropolitana", "Costa", "Sierra", "Selva"],
+         "condicion_pobreza": ["Pobre extremo", "Pobre no extremo", "No pobre"]}
 ETIQUETA = {"area": "área de residencia", "sexo": "sexo", "grupo_edad": "grupo de edad",
             "sexo_jefe": "sexo del jefe de hogar", "region_natural": "región natural", "nombre_dominio": "dominio",
-            "departamento": "departamento"}
-INDICADOR = {"pobre": "Pobreza monetaria", "pobre_extremo": "Pobreza monetaria extrema"}
+            "departamento": "departamento", "condicion_pobreza": "condición de pobreza"}
+# Qué se grafica: un % de personas (pobreza) o la media ponderada de una variable continua.
+META = {
+    "pobre": {"nombre": "Pobreza monetaria", "eje": "% de personas en pobreza monetaria",
+              "unidad": "% de personas", "fmt": "{:.1f} %", "media": False},
+    "pobre_extremo": {"nombre": "Pobreza monetaria extrema", "eje": "% de personas en pobreza monetaria extrema",
+                      "unidad": "% de personas", "fmt": "{:.1f} %", "media": False},
+    "participacion_alimentos": {"nombre": "Participación de los alimentos en el gasto del hogar",
+                                "eje": "% del gasto total del hogar destinado a alimentos",
+                                "unidad": "% del gasto del hogar, promedio por persona", "fmt": "{:.1f} %",
+                                "media": True},
+    "gasto_pc_mensual": {"nombre": "Gasto per cápita mensual", "eje": "soles por persona al mes",
+                         "unidad": "soles corrientes por persona al mes", "fmt": "S/ {:,.0f}", "media": True},
+}
+INDICADOR = {k: v["nombre"] for k, v in META.items()}
+
+
+def fmt(indicador, v):
+    return META[indicador]["fmt"].format(v)
+
+
+def estimador(indicador):
+    return media if META[indicador]["media"] else proporcion
 
 
 def cargar_base(anio=2024):
@@ -53,12 +75,12 @@ def estimar(df, indicador, por, dividir=None):
     if dividir:
         partes = []
         for g in ORDEN.get(dividir, sorted(df[dividir].dropna().unique())):
-            t = proporcion(df[df[dividir] == g], indicador, por=por)
+            t = estimador(indicador)(df[df[dividir] == g], indicador, por=por)
             t["serie"] = g
             partes.append(t)
         t = pd.concat(partes, ignore_index=True)
     else:
-        t = proporcion(df, indicador, por=por)
+        t = estimador(indicador)(df, indicador, por=por)
         t["serie"] = "Total"
     if por == "departamento":
         t["grupo"] = t.grupo.map(df.drop_duplicates("departamento").set_index("departamento").nombre_departamento)
@@ -66,7 +88,9 @@ def estimar(df, indicador, por, dividir=None):
 
 
 FRASE = {"Hombre": "los hombres", "Mujer": "las mujeres", "Urbana": "el área urbana", "Rural": "el área rural",
-         "Jefe hombre": "los hogares con jefe hombre", "Jefa mujer": "los hogares con jefa mujer"}
+         "Jefe hombre": "los hogares con jefe hombre", "Jefa mujer": "los hogares con jefa mujer",
+         "Pobre extremo": "las personas en pobreza extrema", "Pobre no extremo": "las personas en pobreza no extrema",
+         "No pobre": "las personas no pobres"}
 
 
 def frase(grupo, por):
@@ -81,6 +105,13 @@ def titulo_automatico(t, indicador, por):
     """Un título que dice el hallazgo, calculado con los mismos números del gráfico."""
     nombre = INDICADOR[indicador].lower().replace("pobreza monetaria", "pobreza")
     series = list(dict.fromkeys(t.serie))
+    if META[indicador]["media"]:   # variable continua: comparación neutra entre el valor más alto y el más bajo
+        s0 = t[t.serie == series[0]].sort_values("valor_pct", ascending=False)
+        alto, bajo = s0.iloc[0], s0.iloc[-1]
+        extra = " (diferencia no concluyente)" if alto.ic95_inf <= bajo.ic95_sup else ""
+        donde = f" en {frase(series[0], '')}" if len(series) > 1 else ""
+        return (f"{INDICADOR[indicador]}{donde}: {fmt(indicador, alto.valor_pct)} en {frase(alto.grupo, por)} frente a "
+                f"{fmt(indicador, bajo.valor_pct)} en {frase(bajo.grupo, por)}{extra}")
     if len(series) == 2:   # barras agrupadas: ¿una serie supera a la otra en todos los grupos?
         a = t[t.serie == series[0]].set_index("grupo")
         b = t[t.serie == series[1]].set_index("grupo")
@@ -115,7 +146,12 @@ def graficar(t, indicador, por, dividir, filtro, titulo, nacional, archivo):
     if por in ORDEN:
         grupos = grupos[::-1]       # orden natural de arriba hacia abajo
     lineas_titulo = textwrap.wrap(titulo.replace(" %", " %"), 88)   # «27.4 %» no se parte
-    cabecera = 0.32 + 0.24 * len(lineas_titulo) + 0.3    # pulgadas para título y subtítulo
+    sub = (f"{INDICADOR[indicador]} según {ETIQUETA.get(por, por)}"
+           + (f" y {ETIQUETA.get(dividir, dividir)}" if dividir else "")
+           + f", Perú 2024 ({META[indicador]['unidad']}; líneas grises: IC 95 %)"
+           + (f". Filtro: {filtro}" if filtro else ""))
+    lineas_sub = textwrap.wrap(sub, 118)
+    cabecera = 0.32 + 0.24 * len(lineas_titulo) + 0.18 * len(lineas_sub) + 0.12   # pulgadas para título y subtítulo
     alto_fig = max(3.2, 0.34 * len(grupos) * len(series) + 1.2) + cabecera
     fig, ax = plt.subplots(figsize=(9, alto_fig), facecolor=FONDO)
     ax.set_facecolor(FONDO)
@@ -128,15 +164,15 @@ def graficar(t, indicador, por, dividir, filtro, titulo, nacional, archivo):
         ax.errorbar(d.valor_pct, y, xerr=[d.valor_pct - d.ic95_inf, d.ic95_sup - d.valor_pct], fmt="none",
                     ecolor=GRIS, elinewidth=1, capsize=2, zorder=3)
         for yy, v, sup in zip(y, d.valor_pct, d.ic95_sup):
-            ax.text(sup + 0.6, yy, f"{v:.1f} %", va="center", ha="left", fontsize=8.5, color=TINTA, zorder=4,
+            ax.text(sup + 0.01 * t.ic95_sup.max(), yy, fmt(indicador, v), va="center", ha="left", fontsize=8.5, color=TINTA, zorder=4,
                     bbox={"facecolor": FONDO, "edgecolor": "none", "pad": 0.5})
     ax.set_yticks(range(len(grupos)))
     ax.set_yticklabels(grupos, fontsize=9, color=TINTA)
     ax.axvline(nacional, color=TINTA2, lw=1, ls="--", zorder=1)
-    ax.text(nacional, len(grupos) - 0.4, f" Perú: {nacional:.1f} %", fontsize=8, color=TINTA2, va="bottom")
+    ax.text(nacional, len(grupos) - 0.4, f" Perú: {fmt(indicador, nacional)}", fontsize=8, color=TINTA2, va="bottom")
     ax.set_xlim(0, max(t.ic95_sup.max() * 1.15, nacional * 1.2))
     ax.set_ylim(-0.6, len(grupos) - 0.2)
-    ax.set_xlabel(f"% de personas en {INDICADOR[indicador].lower()}", fontsize=9, color=TINTA2)
+    ax.set_xlabel(META[indicador]["eje"], fontsize=9, color=TINTA2)
     ax.grid(axis="x", color="#e4e3df", lw=0.8, zorder=0)
     ax.spines[["top", "right", "left"]].set_visible(False)
     ax.tick_params(axis="y", length=0)
@@ -144,13 +180,10 @@ def graficar(t, indicador, por, dividir, filtro, titulo, nacional, archivo):
     if len(series) > 1:
         ax.legend(title=ETIQUETA.get(dividir, dividir).capitalize(), fontsize=8, title_fontsize=8, frameon=False,
                   loc="lower right")
-    sub = (f"{INDICADOR[indicador]} según {ETIQUETA.get(por, por)}"
-           + (f" y {ETIQUETA.get(dividir, dividir)}" if dividir else "")
-           + f", Perú 2024 (% de personas; líneas grises: IC 95 %)" + (f". Filtro: {filtro}" if filtro else ""))
     pulg = 1 / alto_fig   # una pulgada en coordenadas de figura
     fig.text(0.015, 1 - 0.22 * pulg, "\n".join(lineas_titulo), ha="left", va="top", fontsize=11.5,
              fontweight="bold", color=TINTA, linespacing=1.25)
-    fig.text(0.015, 1 - (0.3 + 0.24 * len(lineas_titulo)) * pulg, sub, ha="left", va="top", fontsize=9,
+    fig.text(0.015, 1 - (0.3 + 0.24 * len(lineas_titulo)) * pulg, chr(10).join(lineas_sub), ha="left", va="top", fontsize=9,
              color=TINTA2)
     fig.text(0.015, 0.12 * pulg, "Fuente: INEI, ENAHO 2024 (módulos 34 y 02). Residentes habituales ponderados con "
              "facpob07; IC de diseño (conglome dentro de estrato). Elaboración: skill graficando-enaho.",
@@ -171,7 +204,7 @@ def un_grafico(df, indicador, por, dividir=None, filtro=None, titulo=None, archi
     if sub.empty:
         sys.exit(f"ERROR: el filtro {filtro!r} no deja observaciones.")
     t = estimar(sub, indicador, por, dividir)
-    nacional = proporcion(sub, indicador).valor_pct.iloc[0]
+    nacional = estimador(indicador)(sub, indicador).valor_pct.iloc[0]
     titulo = titulo or re.sub(r"\bde el\b", "del", titulo_automatico(t, indicador, por))
     archivo = archivo or "_".join(x for x in [indicador.replace("pobre", "pobreza"), por, dividir,
                                                 re.sub(r"\W+", "_", filtro or "").strip("_").lower()] if x)
@@ -186,7 +219,8 @@ def main():
     p = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     p.add_argument("--por", default="area", help=f"agrupación: {', '.join(ETIQUETA)}")
     p.add_argument("--dividir", help="segunda dimensión para barras agrupadas (p. ej. area o sexo)")
-    p.add_argument("--indicador", default="pobre", choices=list(INDICADOR))
+    p.add_argument("--indicador", default="pobre", choices=list(INDICADOR),
+                   help="pobre, pobre_extremo (% de personas) o una media: participacion_alimentos, gasto_pc_mensual")
     p.add_argument("--filtro", help="subconjunto con sintaxis de pandas.query, p. ej. \"area == 'Rural'\"")
     p.add_argument("--titulo", help="título analítico; si no se da, se genera con el hallazgo principal")
     p.add_argument("--archivo", help="nombre del archivo sin extensión (en figuras/)")

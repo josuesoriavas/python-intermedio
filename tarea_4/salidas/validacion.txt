@@ -1,5 +1,5 @@
 VALIDACIÓN ENAHO 2024 · skill limpiando-enaho
-Generado: 2026-11-09 11:49 · script: .claude/skills/limpiando-enaho/scripts/limpiar.py
+Generado: 2026-11-09 12:19 · script: .claude/skills/limpiando-enaho/scripts/limpiar.py
 Fuente: INEI, ENAHO 2024 (código 966): 966-Modulo34.zip:966-Modulo34/sumaria-2024.dta y 966-Modulo02.zip:966-Modulo02/enaho01-2024-200.dta
 Unidad de análisis: personas residentes habituales. Peso: facpob07 (factor de expansión poblacional).
 E = validación esencial (si falla, el proceso se detiene); A = advertencia.
@@ -30,10 +30,12 @@ E = validación esencial (si falla, el proceso se detiene); A = advertencia.
               método INEI 24.81 % · residentes habituales 24.74 % (ref. 24.8 %)
 [APROBADA] A  Pobreza rural
               método INEI 39.30 % · residentes habituales 39.44 % (ref. 39.3 %)
+[APROBADA] A  Participación de alimentos en el gasto entre 0 y 100 % (gashog2d > 0)
+              33,691 hogares con dato; rango 0.0–96.5 %
 [APROBADA] A  Pobreza en Lima Metropolitana (dominio 8)
               método INEI 28.21 % · residentes habituales 28.03 % (ref. 28.2 %)
 
-Resumen: 14 de 14 aprobadas; 0 fallidas (0 esenciales).
+Resumen: 15 de 15 aprobadas; 0 fallidas (0 esenciales).
 Resultado: BASE VÁLIDA
 
 Pobreza nacional 2024: 27.53 % de las personas (facpob07) · 27.58 % con el método INEI (factor07 × mieperho).

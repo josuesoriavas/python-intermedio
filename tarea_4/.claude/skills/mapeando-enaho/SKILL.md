@@ -7,10 +7,12 @@ allowed-tools: Bash(uv run:*), Read, Glob
 
 # Mapeando la ENAHO 2024
 
-## Antes de mapear
+## Antes de mapear (obligatorio)
 
-Si no existe `salidas/personas_2024.parquet`, usa primero la skill **limpiando-enaho**. El script también lo hace
-solo: si falta la base, corre `limpiar.py` y se detiene si la validación falla.
+1. Comprueba con Glob si existe `salidas/personas_2024.parquet`.
+2. **Si no existe, invoca primero la skill `limpiando-enaho`** (herramienta Skill) y sigue sus pasos hasta que
+   `salidas/validacion.txt` diga `BASE VÁLIDA`. Si la limpieza falla, detente e informa: no hay mapa sin base válida.
+3. Recién entonces corre el mapa. (Como red de seguridad, `mapear.py` también se niega a dibujar sin base válida.)
 
 ## Correr
 

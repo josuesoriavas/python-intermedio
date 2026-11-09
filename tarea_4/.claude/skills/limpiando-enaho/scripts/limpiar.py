@@ -52,6 +52,13 @@ DOMINIOS = {1: "Costa Norte", 2: "Costa Centro", 3: "Costa Sur", 4: "Sierra Nort
 REGION_NATURAL = {1: "Costa", 2: "Costa", 3: "Costa", 4: "Sierra", 5: "Sierra", 6: "Sierra", 7: "Selva",
                   8: "Lima Metropolitana"}
 EDADES = [(0, 14, "0-14"), (15, 29, "15-29"), (30, 44, "30-44"), (45, 64, "45-64"), (65, 200, "65 y más")]
+CONDICION = {1: "Pobre extremo", 2: "Pobre no extremo", 3: "No pobre"}
+# Gasto anual del hogar en alimentos (grupo 1), como en el do-file oficial del INEI
+# (ConstVarGasto 2024, 01.ConstrVarGastoIngreso2014-2024.do: gpcrg3 + gpcrg8 + gpcrg9, sin deflactar):
+# dentro del hogar (comprado, autoconsumo, especie, donaciones, otros) + fuera del hogar.
+ALIMENTOS = ["gru11hd", "gru12hd1", "gru12hd2", "gru13hd1", "gru13hd2", "gru13hd3",          # dentro del hogar
+             "sg23", "sig24",                                                                # fuera del hogar
+             "gru14hd", "gru14hd1", "gru14hd2", "gru14hd3", "gru14hd4", "gru14hd5", "sg25", "sig26", "sg27", "sig28"]
 
 
 class ValidacionFallida(Exception):
@@ -106,7 +113,10 @@ def construir(anio, carpeta_datos):
     zip02 = asegurar_zip(carpeta_datos, anio, "02")
     sumaria, arch34 = leer_stata(zip34, ARCHIVOS["34"].format(anio=anio),
                                  LLAVES_HOGAR + ["ubigeo", "dominio", "estrato", "pobreza", "mieperho", "factor07",
-                                                 "gashog2d", "linea", "linpe"])
+                                                 "gashog2d", "linea", "linpe"] + ALIMENTOS)
+    sumaria["gasto_alimentos"] = sumaria[ALIMENTOS].fillna(0).sum(axis=1)
+    sumaria["participacion_alimentos"] = (100 * sumaria.gasto_alimentos / sumaria.gashog2d).where(sumaria.gashog2d > 0)
+    sumaria = sumaria.drop(columns=ALIMENTOS)
     miembros, arch02 = leer_stata(zip02, ARCHIVOS["02"].format(anio=anio),
                                   LLAVES_HOGAR + ["codperso", "ubigeo", "p203", "p204", "p205", "p206", "p207",
                                                   "p208a", "facpob07"])
@@ -130,6 +140,7 @@ def construir(anio, carpeta_datos):
     base["area"] = (base.estrato <= 5).map({True: "Urbana", False: "Rural"})
     base["pobre"] = (base.pobreza <= 2).astype("int8")
     base["pobre_extremo"] = (base.pobreza == 1).astype("int8")
+    base["condicion_pobreza"] = base.pobreza.map(CONDICION)
     base["sexo"] = base.p207.map({1: "Hombre", 2: "Mujer"})
     base["sexo_jefe"] = base.sexo_jefe_cod.map({1: "Jefe hombre", 2: "Jefa mujer"})
     base["edad"] = base.p208a
@@ -141,8 +152,8 @@ def construir(anio, carpeta_datos):
     base["anio"] = anio
     columnas = ["anio", "conglome", "vivienda", "hogar", "codperso", "ubigeo", "departamento", "nombre_departamento",
                 "dominio", "nombre_dominio", "region_natural", "estrato", "area", "p203", "sexo", "edad",
-                "grupo_edad", "sexo_jefe", "pobreza", "pobre", "pobre_extremo", "gasto_pc_mensual", "linea", "linpe",
-                "mieperho", "facpob07", "factor07"]
+                "grupo_edad", "sexo_jefe", "pobreza", "condicion_pobreza", "pobre", "pobre_extremo", "gasto_pc_mensual",
+                "gasto_alimentos", "participacion_alimentos", "linea", "linpe", "mieperho", "facpob07", "factor07"]
     # Base de hogares para el método oficial del INEI: cada hogar pesa factor07 × mieperho (miembros del hogar)
     hogares = sumaria.copy()
     hogares["departamento"] = hogares.ubigeo.str[:2]
@@ -150,6 +161,7 @@ def construir(anio, carpeta_datos):
     hogares["area"] = (hogares.estrato <= 5).map({True: "Urbana", False: "Rural"})
     hogares["pobre"] = (hogares.pobreza <= 2).astype("int8")
     hogares["pobre_extremo"] = (hogares.pobreza == 1).astype("int8")
+    hogares["condicion_pobreza"] = hogares.pobreza.map(CONDICION)
     hogares["nombre_dominio"] = hogares.dominio.map(DOMINIOS)
     hogares["region_natural"] = hogares.dominio.map(REGION_NATURAL)
     hogares["peso_inei"] = hogares.factor07 * hogares.mieperho
@@ -213,6 +225,10 @@ def validar(base, ctx, anio):
         check(f"Pobreza {k}", abs(area_h[g] - ref[k]) <= TOL_NACIONAL,
               f"método INEI {area_h[g]:.2f} % · residentes habituales {area_p[g]:.2f} % (ref. {ref[k]} %)",
               esencial=False)
+    pa = hogares.participacion_alimentos
+    check("Participación de alimentos en el gasto entre 0 y 100 % (gashog2d > 0)",
+          pa.notna().all() and pa.between(0, 100).all(),
+          f"{pa.notna().sum():,} hogares con dato; rango {pa.min():.1f}–{pa.max():.1f} %", esencial=False)
     lima_p = proporcion(base[base.dominio == 8], "pobre").iloc[0].valor_pct
     lima_h = proporcion(hogares[hogares.dominio == 8], "pobre", peso="peso_inei").iloc[0].valor_pct
     check("Pobreza en Lima Metropolitana (dominio 8)", abs(lima_h - ref["lima_metropolitana"]) <= TOL_NACIONAL,

@@ -7,11 +7,12 @@ allowed-tools: Bash(uv run:*), Read, Glob
 
 # Graficando la ENAHO 2024
 
-## Antes de graficar
+## Antes de graficar (obligatorio)
 
-Si no existe `salidas/personas_2024.parquet`, usa primero la skill **limpiando-enaho** (o deja que el script la
-ejecute: si no encuentra la base corre `limpiar.py` y se detiene si la validación falla). Nunca grafiques con una base
-que no pasó `salidas/validacion.txt`.
+1. Comprueba con Glob si existe `salidas/personas_2024.parquet`.
+2. **Si no existe, invoca primero la skill `limpiando-enaho`** (herramienta Skill) y sigue sus pasos hasta que
+   `salidas/validacion.txt` diga `BASE VÁLIDA`. Si la limpieza falla, detente e informa.
+3. Recién entonces grafica. Nunca grafiques con una base que no pasó la validación (el script también se niega).
 
 ## Traducir el pedido a argumentos
 
@@ -26,6 +27,8 @@ que no pasó `salidas/validacion.txt`.
 | «por edad y área», «sexo dentro de cada área» | `--por grupo_edad --dividir area` |
 | «solo en zonas rurales» | `--filtro "area == 'Rural'"` |
 | «pobreza extrema» | `--indicador pobre_extremo` |
+| «cuánto gastan en alimentos los pobres», «peso de la comida en el gasto» | `--indicador participacion_alimentos --por condicion_pobreza` (añade `--dividir area` para urbano/rural) |
+| «gasto per cápita por región» | `--indicador gasto_pc_mensual --por region_natural` |
 | «los gráficos básicos» | `--todos` (área, sexo, departamento, edad × área) |
 
 Corre desde la raíz del proyecto:

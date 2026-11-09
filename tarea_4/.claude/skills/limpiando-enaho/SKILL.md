@@ -33,6 +33,7 @@ propio.
    uv run python ${CLAUDE_SKILL_DIR}/scripts/consultar.py --por sexo --filtro "area == 'Rural'"
    uv run python ${CLAUDE_SKILL_DIR}/scripts/consultar.py --indicador pobre_extremo
    uv run python ${CLAUDE_SKILL_DIR}/scripts/consultar.py --media gasto_pc_mensual --por region_natural
+   uv run python ${CLAUDE_SKILL_DIR}/scripts/consultar.py --media participacion_alimentos --por condicion_pobreza
    ```
 
    Las tablas ya calculadas están en `salidas/indicadores.csv` (columna `metodo`).

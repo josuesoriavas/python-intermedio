@@ -1,0 +1,4 @@
+grupo,valor_pct,ee_pct,ic95_inf,ic95_sup,n_muestra,poblacion_expandida,serie
+No pobre,33.631,0.159,33.319,33.943,80837,24747318.508,Total
+Pobre extremo,51.687,0.656,50.401,52.973,6526,1878050.799,Total
+Pobre no extremo,44.82,0.299,44.235,45.405,21301,7522396.487,Total

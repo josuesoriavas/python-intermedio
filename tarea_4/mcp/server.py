@@ -309,23 +309,32 @@ def graficar_serie(codigos: list[str], desde: str, hasta: str, titulo: str | Non
             return pd.Timestamp(int(anio), 3 * int(t) - 1, 15)
         return int(p)
 
-    fig, ax = plt.subplots(figsize=(9, 5))
-    colores = ["#1f4e79", "#c0504d", "#4f8f3a", "#8064a2"]
-    for (ficha, datos), color in zip(series, colores):
+    import textwrap
+
+    # Nombre corto para la leyenda: lo que sigue al último " - " del nombre oficial (p. ej. "IPC Alimentos y Bebidas")
+    cortos = [f["nombre"].rsplit(" - ", 1)[-1] for f, _ in series]
+    comun = series[0][0]["nombre"].rsplit(" - ", 1)[0] if all(
+        f["nombre"].rsplit(" - ", 1)[0] == series[0][0]["nombre"].rsplit(" - ", 1)[0] for f, _ in series) else ""
+    fig, ax = plt.subplots(figsize=(9, 5.4), facecolor="#fcfcfb")
+    ax.set_facecolor("#fcfcfb")
+    colores = ["#2a78d6", "#eb6834", "#1baf7a", "#6250d6"]   # paleta categórica validada (orden fijo)
+    for (ficha, datos), color, corto in zip(series, colores, cortos):
         ax.plot([_x(x["periodo"]) for x in datos], [x["valor"] for x in datos], color=color, lw=2,
-                marker="o" if len(datos) <= 15 else None,
-                label=f'{ficha["nombre"][:70]} ({ficha["codigo"]})')
+                marker="o" if len(datos) <= 15 else None, label=f'{corto} ({ficha["codigo"]})')
     ax.axhline(0, color="#999", lw=0.8)
     p0, p1 = series[0][1][0]["periodo"], series[0][1][-1]["periodo"]
-    ax.set_title(titulo or series[0][0]["nombre"], loc="left", fontsize=12, fontweight="bold")
-    ax.set_ylabel(unidad or "valor de la serie")
+    lineas = textwrap.wrap(titulo or series[0][0]["nombre"], 80)
+    fig.text(0.012, 0.985, "\n".join(lineas), ha="left", va="top", fontsize=12, fontweight="bold", color="#0b0b0b")
+    sub = f"{comun}, {p0} a {p1}" if comun else f"Período: {p0} a {p1}"
+    fig.text(0.012, 0.985 - 0.05 * len(lineas) - 0.01, sub, ha="left", va="top", fontsize=9, color="#52514e")
+    ax.set_ylabel(unidad or "valor de la serie", color="#52514e")
     ax.grid(alpha=0.3)
     ax.spines[["top", "right"]].set_visible(False)
-    ax.legend(fontsize=8, frameon=False, loc="best")
-    fig.text(0.01, 0.01, f"Período: {p0} a {p1}. Fuente: BCRP, estadisticas.bcrp.gob.pe, series "
-             f"{', '.join(f['codigo'] for f, _ in series)} (consulta {date.today():%d/%m/%Y}).",
-             fontsize=7.5, color="#555")
-    fig.tight_layout(rect=(0, 0.04, 1, 1))
+    ax.legend(fontsize=8.5, frameon=False, loc="best")
+    fig.text(0.012, 0.012, f"Fuente: BCRP, estadisticas.bcrp.gob.pe, series "
+             f"{', '.join(f['codigo'] for f, _ in series)} (consulta {date.today():%d/%m/%Y}). "
+             f"Elaboración: servidor MCP bcrp (graficar_serie).", fontsize=7.5, color="#52514e")
+    fig.tight_layout(rect=(0, 0.04, 1, 0.985 - 0.05 * len(lineas) - 0.05))
     FIGURAS.mkdir(exist_ok=True)
     nombre = archivo or f"bcrp_{'_'.join(f['codigo'] for f, _ in series)}_{p0}_{p1}"
     ruta = FIGURAS / (re.sub(r"[^\w.-]", "_", Path(nombre).stem) + ".png")
