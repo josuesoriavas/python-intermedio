@@ -1,0 +1,20 @@
+20 sesiones de claude -p con sonnet (carpetas temporales en C:\Users\<usuario>\AppData\Local\Temp\tarea4_eval_3_r_msvm)...
+Listo en 113 s
+modo            A           B
+id                           
+B1       correcta    correcta
+B2     incorrecta    correcta
+B3    no contesta    correcta
+B4    no contesta    correcta
+C1    no contesta  incorrecta
+C2    no contesta  incorrecta
+E1       correcta    correcta
+E2    no contesta    correcta
+E3    no contesta    correcta
+E4    no contesta    correcta
+
+resultado  correcta  incorrecta  no contesta  segundos_prom  costo_usd
+modo                                                                  
+A                 2           1            7            7.2      0.178
+B                 8           2            0           25.9      0.757
+exit=0
