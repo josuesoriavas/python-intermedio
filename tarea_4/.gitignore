@@ -1,0 +1,14 @@
+# Entorno
+.venv/
+__pycache__/
+.pytest_cache/
+
+# Microdatos originales y bases intermedias (se descargan y regeneran con los scripts)
+datos/
+salidas/*.parquet
+
+# Config local de Claude Code (permisos de la máquina)
+.claude/settings.local.json
+
+# Corridas temporales de la evaluación
+evaluacion/_tmp/
