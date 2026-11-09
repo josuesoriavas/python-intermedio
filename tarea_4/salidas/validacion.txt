@@ -1,0 +1,41 @@
+VALIDACIÓN ENAHO 2024 · skill limpiando-enaho
+Generado: 2026-11-09 11:49 · script: .claude/skills/limpiando-enaho/scripts/limpiar.py
+Fuente: INEI, ENAHO 2024 (código 966): 966-Modulo34.zip:966-Modulo34/sumaria-2024.dta y 966-Modulo02.zip:966-Modulo02/enaho01-2024-200.dta
+Unidad de análisis: personas residentes habituales. Peso: facpob07 (factor de expansión poblacional).
+E = validación esencial (si falla, el proceso se detiene); A = advertencia.
+
+[APROBADA] E  Llaves de hogar únicas en la sumaria (conglome, vivienda, hogar)
+              33,691 hogares (ref. 33,691), 0 duplicados
+[APROBADA] E  Llaves de persona únicas en el módulo 02 (+ codperso)
+              117,721 filas (ref. 117,721), 0 duplicados
+[APROBADA] E  Llaves leídas como texto con ceros iniciales
+              conglome: 6 car. (0 mal), vivienda: 3 car. (0 mal), hogar: 2 car. (0 mal), codperso: 2 car. (0 mal), ubigeo: 6 car. (0 mal)
+[APROBADA] E  Residentes habituales
+              108,664 (ref. 108,664) con (p204==1 & p205==2) | (p204==2 & p206==1)
+[APROBADA] E  Unión m:1 personas-hogares sin duplicar ni perder filas
+              108,664 antes, 108,664 después, 0 personas sin hogar en la sumaria
+[APROBADA] E  25 códigos departamentales (ubigeo[:2] = 01..25, Lima 15 y Callao 07 separados)
+              25 códigos: 01..25
+[APROBADA] E  Factores de expansión válidos (facpob07 y factor07 > 0, sin nulos)
+              población expandida (Σ facpob07) = 34,147,768 personas
+[APROBADA] E  Pobreza monetaria nacional (personas, facpob07)
+              27.53 % (ref. 27.6 %, tol. ±0.1); IC95 26.51–28.55
+[APROBADA] E  Pobreza monetaria nacional (método INEI: sumaria, factor07 × mieperho)
+              27.58 % (ref. 27.6 %, tol. ±0.1)
+[APROBADA] A  La ponderación cambia el resultado (promedio simple ≠ ponderado)
+              sin ponderar daría 25.61 %: -1.92 pp de sesgo
+[APROBADA] A  Pobreza extrema nacional (personas, facpob07)
+              5.50 % (ref. 5.5 %)
+[APROBADA] A  Pobreza urbana
+              método INEI 24.81 % · residentes habituales 24.74 % (ref. 24.8 %)
+[APROBADA] A  Pobreza rural
+              método INEI 39.30 % · residentes habituales 39.44 % (ref. 39.3 %)
+[APROBADA] A  Pobreza en Lima Metropolitana (dominio 8)
+              método INEI 28.21 % · residentes habituales 28.03 % (ref. 28.2 %)
+
+Resumen: 14 de 14 aprobadas; 0 fallidas (0 esenciales).
+Resultado: BASE VÁLIDA
+
+Pobreza nacional 2024: 27.53 % de las personas (facpob07) · 27.58 % con el método INEI (factor07 × mieperho).
+
+Nota sobre los dos métodos. La base principal son los residentes habituales del módulo 02 (108,664 personas) ponderados con facpob07. El INEI publica la pobreza con la sumaria, donde cada hogar pesa factor07 × mieperho (Σ mieperho = 109,842; en el módulo 02 hay 109,842 personas con p204 == 1, miembros del hogar). Los residentes habituales excluyen a 1,787 miembros ausentes 30 días o más (p204 == 1 y p205 == 1) e incluyen a 609 no miembros presentes 30 días o más (p204 == 2 y p206 == 1). Por eso sus cifras difieren unas décimas de las oficiales. El método INEI se usa para validar contra las cifras publicadas y está en indicadores.csv con metodo = inei_hogares.

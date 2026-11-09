@@ -1,0 +1,4 @@
+Comparación con referencias/pobreza_departamento_2024.csv (Sesión 16), redondeado a 1 decimal:
+  método INEI (factor07 × mieperho): 25/25 iguales, máx. |dif| = 0.0 pp
+  residentes habituales (facpob07): 6/25 iguales, máx. |dif| = 0.5 pp (Amazonas, Huánuco, Loreto, Pasco, Puno, Tumbes con |dif| ≥ 0.3), correlación de rangos = 0.999
+  La diferencia viene de la población: residentes habituales frente a miembros del hogar (mieperho). Ver salidas/validacion.txt.
