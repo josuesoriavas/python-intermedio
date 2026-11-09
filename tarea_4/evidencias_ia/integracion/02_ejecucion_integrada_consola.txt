@@ -1,0 +1,23 @@
+134.4 s · MCP ['mcp__bcrp__buscar_series', 'mcp__bcrp__comparar_periodos', 'mcp__bcrp__graficar_serie', 'mcp__bcrp__resumen', 'mcp__bcrp__serie'] · skills ['limpiando-enaho', 'graficando-enaho', 'mapeando-enaho'] · errores 2 · salida 0
+Escribí `informes/informe_final.md` con las nueve secciones y cuatro hallazgos numerados. Las cifras salieron de las herramientas, y no revisé a ojo los gráficos ni el mapa.
+
+1. **Actividad:** el PBI real cayó 10.9 % en 2020 (`PM04923AA`). Luego subió 13.4 % en 2021 y 2.8 % en 2022, bajó 0.4 % en 2023 y subió 3.5 % en 2024.
+2. **Inflación:** la general de Lima Metropolitana (`PN01273PM`) tuvo su máximo de 8.8 % en 2022-06. La de alimentos (`PN09822PM`) llegó a 13.2 % en 2023-02, y en 2024-12 estaba en 1.2 %.
+3. **Pobreza 2024 (ENAHO):** 27.5 % a nivel nacional, 39.4 % en el área rural y 24.7 % en la urbana. Cajamarca tuvo 45.0 % e Ica 5.9 %.
+4. **Alimentos en el gasto:** pesan 33.6 % entre los no pobres y 51.7 % entre los pobres extremos, con intervalos de confianza que no se superponen.
+5. **Contraste:** la base pasó 15 de 15 validaciones y coincide con las cifras oficiales (27.58 % con el método INEI frente a 27.6 % publicado). En el mapa, con el método INEI coinciden 25 de 25 departamentos con la referencia del curso. Con residentes habituales coinciden 6 de 25, con diferencia máxima de 0.5 pp, porque la población de referencia es otra.
+
+En Limitaciones anoté los contratiempos de herramientas:
+- Faltaba `personas_2024.parquet`, así que rehíce la limpieza.
+- Mi primer título del gráfico del BCRP situaba mal el máximo de alimentos, y lo regeneré.
+- Dos comandos con variables de shell fueron rechazados.
+
+**Archivos generados o regenerados**
+- `informes/informe_final.md`
+- `figuras/bcrp_inflacion_2019_2024.png`
+- `figuras/pobreza_departamento.png` y `.csv`
+- `figuras/participacion_alimentos_condicion_pobreza.png` y `.csv`
+- `mapas/pobreza_departamento_2024.png` y `.csv`
+- `mapas/comparacion_referencia.csv` y `.txt`
+- `salidas/personas_2024.parquet`, `hogares_2024.parquet`, `indicadores.csv` y `validacion.txt`
+exit=0

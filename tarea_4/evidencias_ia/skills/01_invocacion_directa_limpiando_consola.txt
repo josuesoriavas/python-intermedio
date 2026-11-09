@@ -1,0 +1,23 @@
+20.5 s · MCP [] · skills [] · errores 0 · salida 0
+La limpieza de la ENAHO 2024 terminó y la base quedó **válida**: pasaron las 15 validaciones (cero fallidas).
+
+**Bases generadas** (en `salidas/`)
+- `personas_2024.parquet`: 108,664 residentes habituales.
+- `hogares_2024.parquet`: 33,691 hogares.
+- `indicadores.csv`: 178 filas con los indicadores ya calculados.
+- `validacion.txt`: el detalle de las validaciones.
+
+**Pobreza monetaria nacional 2024**
+- **Personas (`facpob07`):** 27.5 % de las personas, con IC 95 % de 26.5 a 28.6.
+- **Método INEI (sumaria, `factor07 × mieperho`):** 27.6 %, igual a la cifra publicada.
+- **Pobreza extrema:** 5.5 %.
+- **Urbana y rural:** 24.7 % urbana y 39.4 % rural con residentes habituales. Con el método INEI salen 24.8 % y 39.3 %.
+- **Lima Metropolitana:** 28.0 % con residentes habituales y 28.2 % con el método INEI.
+- **Efecto de ponderar:** el promedio sin ponderar daría 25.6 %, así que subestima la pobreza en 1.9 puntos porcentuales.
+
+Los dos métodos difieren unas décimas porque cuentan poblaciones distintas. Los residentes habituales excluyen a 1,787 miembros ausentes 30 días o más e incluyen a 609 no miembros presentes 30 días o más.
+
+Fuente: INEI, ENAHO 2024, módulos 34 y 02.
+
+Si quiere un corte concreto (por departamento, sexo o área, por ejemplo), lo calculo con `consultar.py`.
+exit=0

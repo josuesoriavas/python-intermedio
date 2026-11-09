@@ -1,0 +1,16 @@
+fuente,afirmacion,valor_informe,valor_recalculado,diferencia,coincide,tolerancia_redondeo,procedimiento
+BCRP,"PBI real 2024, var. % anual (PM04923AA)",3.5,3.5153,0.0153,sí,0.05,"API directa, año 2024"
+BCRP,"PBI real 2020, var. % anual (PM04923AA)",-10.9,-10.9333,-0.0333,sí,0.05,"API directa, año 2020"
+BCRP,"Máximo IPC Alimentos y Bebidas 2019-2024, var. % 12m (PN09822PM), en feb-2023",13.2,13.1637,-0.0363,sí,0.05,API directa; máximo de 72 meses en Feb.2023
+BCRP,Promedio 2022 IPC Alimentos y Bebidas (PN09822PM),10.8,10.7757,-0.0243,sí,0.05,API directa; promedio simple de los 12 meses de 2022
+BCRP,"Caída del promedio 2022→2024 de la inflación de alimentos, pp",-8.8,-8.761,0.039,sí,0.05,promedio 2024 menos promedio 2022
+BCRP,"Máximo IPC general 2019-2024, var. % 12m (PN01273PM), en jun-2022",8.8,8.8126,0.0126,sí,0.05,API directa; máximo en Jun.2022
+ENAHO,"Pobreza nacional, residentes habituales (facpob07)",27.5,27.5287,0.0287,sí,0.05,"108,664 residentes; filtro p204/p205/p206; peso facpob07"
+ENAHO,"Pobreza nacional, método INEI (factor07×mieperho)",27.6,27.5795,-0.0205,sí,0.05,"33,691 hogares de la sumaria; cifra oficial INEI 27.6 %"
+ENAHO,Pobreza rural (facpob07),39.4,39.4417,0.0417,sí,0.05,estrato 6-8
+ENAHO,Pobreza urbana (facpob07),24.7,24.7352,0.0352,sí,0.05,estrato 1-5
+ENAHO,Pobreza en la Sierra (facpob07),31.1,31.1231,0.0231,sí,0.05,dominio 4-6
+ENAHO,Departamento con más pobreza: Cajamarca (06),45.0,44.995,-0.005,sí,0.05,ubigeo[:2] == '06'
+ENAHO,Departamento con menos pobreza: Ica (11),5.9,5.9139,0.0139,sí,0.05,ubigeo[:2] == '11'
+ENAHO,"Participación de alimentos en el gasto, pobres extremos",51.7,51.6872,-0.0128,sí,0.05,"18 rubros de alimentos de la sumaria / gashog2d, promedio ponderado con facpob07"
+ENAHO,"Participación de alimentos en el gasto, no pobres",33.6,33.631,0.031,sí,0.05,"18 rubros de alimentos de la sumaria / gashog2d, promedio ponderado con facpob07"
